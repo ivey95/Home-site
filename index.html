@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Foley Property — Ivan & Michaela</title>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -12,7 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>Foley Property — Ivan & Michaela</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <style>
@@ -241,7 +240,7 @@ tr.done td { opacity: 0.55; }
 .form-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 120px; }
 .form-group label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
 
-input[type=text], input[type=date], input[type=number], select, textarea {
+input[type=text], input[type=date], input[type=number], input[type=email], input[type=time], select, textarea {
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: 5px;
@@ -739,7 +738,7 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
 
 /* ── Back-to-top ─────────────────────────────────────────────── */
 #back-top {
-  position: fixed; bottom: 24px; left: 240px;
+  position: fixed; bottom: 72px; left: 50%;
   width: 36px; height: 36px; border-radius: 50%;
   background: var(--forest); color: var(--cream);
   border: none; font-size: 16px; cursor: pointer;
@@ -780,135 +779,6 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
 }
 #sidebar-collapse-btn:hover { background: var(--forest-light); }
 
-
-/* ── AUTH SCREEN ────────────────────────────────────────────── */
-#auth-screen {
-  position: fixed; inset: 0; z-index: 9000;
-  background: var(--forest);
-  display: flex; align-items: center; justify-content: center;
-  flex-direction: column; padding: 24px;
-}
-#auth-screen.hidden { display: none; }
-.auth-card {
-  background: var(--white); border-radius: 16px;
-  padding: 36px 32px; width: 100%; max-width: 380px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-}
-.auth-logo {
-  font-family: 'Playfair Display', serif;
-  font-size: 28px; font-weight: 700;
-  color: var(--forest); text-align: center; margin-bottom: 4px;
-}
-.auth-sub {
-  text-align: center; color: var(--muted);
-  font-size: 13px; font-style: italic; margin-bottom: 28px;
-}
-.auth-tab-row {
-  display: flex; gap: 0; margin-bottom: 20px;
-  border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
-}
-.auth-tab {
-  flex: 1; padding: 9px; text-align: center; font-size: 13px;
-  font-weight: 600; cursor: pointer; background: var(--cream);
-  color: var(--muted); transition: all .15s; border: none;
-  font-family: 'Source Serif 4', serif;
-}
-.auth-tab.active { background: var(--forest); color: var(--cream); }
-.auth-error {
-  background: var(--red-light); color: var(--red);
-  border-left: 3px solid var(--red);
-  padding: 10px 14px; border-radius: 5px;
-  font-size: 12px; margin-bottom: 14px; display: none;
-}
-.auth-error.show { display: block; }
-.auth-btn {
-  width: 100%; padding: 12px; border-radius: 8px;
-  background: var(--forest); color: var(--cream);
-  border: none; font-size: 14px; font-weight: 600;
-  cursor: pointer; font-family: 'Source Serif 4', serif;
-  margin-top: 4px; transition: all .15s;
-}
-.auth-btn:hover { background: var(--forest-mid); }
-.auth-btn:disabled { opacity: .6; cursor: not-allowed; }
-.auth-divider {
-  text-align: center; margin: 16px 0;
-  font-size: 11px; color: var(--muted);
-  display: flex; align-items: center; gap: 10px;
-}
-.auth-divider::before, .auth-divider::after {
-  content: ''; flex: 1; height: 1px; background: var(--border);
-}
-
-/* ── SYNC STATUS BAR ────────────────────────────────────────── */
-#sync-bar {
-  position: fixed; top: 0; left: 220px; right: 0;
-  height: 2px; z-index: 500; pointer-events: none;
-  transition: left 0.2s;
-}
-#sync-bar.syncing { background: linear-gradient(90deg, var(--forest), var(--forest-light), var(--sage)); background-size: 200% 100%; animation: syncPulse 1.2s infinite; }
-#sync-bar.error { background: var(--red); }
-@keyframes syncPulse { 0%{background-position:0%} 100%{background-position:200%} }
-
-/* ── PRESENCE AVATARS ───────────────────────────────────────── */
-#presence-bar {
-  position: fixed; top: 10px; right: 16px; z-index: 400;
-  display: flex; align-items: center; gap: 6px;
-}
-.presence-dot {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: var(--forest-light); color: white;
-  font-size: 13px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  border: 2px solid var(--cream);
-  box-shadow: var(--shadow);
-  position: relative; cursor: default;
-  transition: transform .15s;
-}
-.presence-dot:hover { transform: scale(1.1); }
-.presence-dot .presence-tooltip {
-  position: absolute; top: 38px; right: 0;
-  background: var(--ink); color: var(--cream);
-  font-size: 11px; padding: 4px 8px; border-radius: 5px;
-  white-space: nowrap; pointer-events: none;
-  opacity: 0; transition: opacity .15s;
-}
-.presence-dot:hover .presence-tooltip { opacity: 1; }
-.presence-dot.ivan { background: #2563eb; }
-.presence-dot.michaela { background: #db2777; }
-
-/* ── OFFLINE BANNER ─────────────────────────────────────────── */
-#offline-banner {
-  display: none; position: fixed; bottom: 0; left: 220px; right: 0;
-  background: var(--amber); color: var(--ink);
-  padding: 10px 20px; font-size: 13px; font-weight: 600;
-  z-index: 400; text-align: center;
-}
-#offline-banner.show { display: block; }
-
-/* ── USER CHIP in sidebar ───────────────────────────────────── */
-#user-chip {
-  padding: 10px 20px 14px;
-  border-top: 1px solid var(--forest-mid);
-}
-.user-chip-inner {
-  display: flex; align-items: center; gap: 10px;
-  background: var(--forest-mid); border-radius: 8px; padding: 8px 12px;
-}
-.user-avatar {
-  width: 30px; height: 30px; border-radius: 50%;
-  background: var(--forest-light); color: white;
-  font-size: 13px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.user-avatar.ivan { background: #2563eb; }
-.user-avatar.michaela { background: #db2777; }
-.user-name { font-size: 12px; font-weight: 600; color: var(--cream); flex: 1; }
-.sign-out-btn {
-  font-size: 10px; color: var(--sage-light); cursor: pointer;
-  background: none; border: none; font-family: inherit; padding: 2px 4px;
-}
-.sign-out-btn:hover { color: var(--cream); }
-
 </style>
 </head>
 <body>
@@ -941,73 +811,12 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
   <div style="padding:12px 20px 6px; border-top:1px solid var(--forest-mid)">
     <a onclick="nav('settings')" id="nav-settings" style="border-radius:6px;padding:8px 12px;display:flex;align-items:center;gap:10px;color:var(--sage-light);font-size:12px;cursor:pointer;text-decoration:none;transition:all .15s" onmouseover="this.style.background='var(--forest-mid)'" onmouseout="this.style.background=''"><span style="font-size:16px">⚙</span> Settings & Customize</a>
   </div>
-  <div id="user-chip"></div>
   <div id="sidebar-footer">
     5619 Hwy 25 NE<br>Foley, MN 56329
   </div>
 </div>
 
 <!-- MAIN CONTENT -->
-
-<!-- SYNC BAR -->
-<div id="sync-bar"></div>
-
-<!-- OFFLINE BANNER -->
-<div id="offline-banner">⚡ You're offline — changes will sync when you reconnect</div>
-
-<!-- PRESENCE AVATARS -->
-<div id="presence-bar"></div>
-
-<!-- AUTH SCREEN -->
-<div id="auth-screen">
-  <div class="auth-card">
-    <div class="auth-logo">Foley Property</div>
-    <div class="auth-sub">Ivan & Michaela · 6 acres</div>
-
-    <div class="auth-tab-row">
-      <button class="auth-tab active" onclick="switchAuthTab('login')" id="tab-login">Sign In</button>
-      <button class="auth-tab" onclick="switchAuthTab('signup')" id="tab-signup">Create Account</button>
-    </div>
-
-    <div id="auth-error" class="auth-error"></div>
-
-    <div id="auth-form-login">
-      <div class="form-group" style="margin-bottom:12px">
-        <label>Email</label>
-        <input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email">
-      </div>
-      <div class="form-group" style="margin-bottom:16px">
-        <label>Password</label>
-        <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password"
-          onkeydown="if(event.key==='Enter')doSignIn()">
-      </div>
-      <button class="auth-btn" onclick="doSignIn()" id="auth-signin-btn">Sign In</button>
-    </div>
-
-    <div id="auth-form-signup" style="display:none">
-      <div class="form-group" style="margin-bottom:12px">
-        <label>Your Name</label>
-        <input type="text" id="auth-name" placeholder="Ivan or Michaela" autocomplete="name">
-      </div>
-      <div class="form-group" style="margin-bottom:12px">
-        <label>Email</label>
-        <input type="email" id="auth-email-su" placeholder="you@example.com" autocomplete="email">
-      </div>
-      <div class="form-group" style="margin-bottom:16px">
-        <label>Password</label>
-        <input type="password" id="auth-password-su" placeholder="min 6 characters" autocomplete="new-password"
-          onkeydown="if(event.key==='Enter')doSignUp()">
-      </div>
-      <button class="auth-btn" onclick="doSignUp()" id="auth-signup-btn">Create Account</button>
-    </div>
-  </div>
-  <div style="margin-top:20px;font-size:12px;color:rgba(255,255,255,0.45);text-align:center">
-    Your data is private and shared only between Ivan & Michaela
-  </div>
-</div>
-
-<!-- USER CHIP will be injected into sidebar -->
-
 <div id="main">
 
 <!-- DASHBOARD -->
@@ -1665,364 +1474,19 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
 </div>
 
 <script>
-
 // ============================================================
-// ⚙  CONFIGURATION — fill in YOUR values from Supabase
-// ============================================================
-const SUPABASE_URL = 'https://tporawvlbkhcgadyaleo.supabase.co';      // e.g. https://abcdef.supabase.co
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwb3Jhd3ZsYmtoY2dhZHlhbGVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1Nzk1NTUsImV4cCI6MjA5MzE1NTU1NX0.YPQdX6Es_qfTzmBJ4RrmA151fOFSnDoGySAvGQsMt5o'; // long string from Supabase → Settings → API
-
-// ============================================================
-// DATA LAYER — Supabase + localStorage fallback
+// DATA LAYER
 // ============================================================
 const KEYS = {
-  tasks:     'foley_tasks',
-  household: 'foley_household',
-  projects:  'foley_projects',
-  food:      'foley_food',
-  mowers:    'foley_mowers',
-  events:    'foley_events',
-  navOrder:  'foley_nav_order',
+  tasks:        'foley_tasks',
+  household:    'foley_household',
+  projects:     'foley_projects',
+  food:         'foley_food',
+  mowers:       'foley_mowers',
+  events:       'foley_events',
+  navOrder:     'foley_nav_order',
   customColors: 'foley_custom_colors',
   customText:   'foley_custom_text',
-};
-
-// Table name mapping (localStorage key → Supabase table)
-const TABLE = {
-  foley_tasks:     'tasks',
-  foley_household: 'household',
-  foley_projects:  'projects',
-  foley_food:      'food',
-  foley_mowers:    'mowers',
-  foley_events:    'events',
-};
-
-// JS object key → Supabase column (snake_case)
-const COL_MAP = {
-  lastDone:    'last_done',
-  usedUp:      'used_up',
-  startTime:   'start_time',
-  endTime:     'end_time',
-  startDate:   'start_date',
-  endDate:     'end_date',
-  allDay:      'all_day',
-  repeatEnd:   'repeat_end',
-  updatedAt:   'updated_at',
-  updatedBy:   'updated_by',
-  targetDate:  'target_date',
-  timeEst:     'time_est',
-};
-
-function toSnake(obj) {
-  const r = {};
-  Object.entries(obj).forEach(([k, v]) => { r[COL_MAP[k] || k] = v; });
-  return r;
-}
-function fromSnake(obj) {
-  const rev = {};
-  Object.entries(COL_MAP).forEach(([js, sql]) => { rev[sql] = js; });
-  const r = {};
-  Object.entries(obj).forEach(([k, v]) => { r[rev[k] || k] = v; });
-  return r;
-}
-
-let _supabase = null;
-let _currentUser = null;
-let _isOnline = navigator.onLine;
-let _realtimeSubs = [];
-let _offlineQueue = [];
-
-function getClient() {
-  if (!_supabase && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
-    _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  }
-  return _supabase;
-}
-
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
-
-// ── Local cache (localStorage) ────────────────────────────────
-function loadLocal(key) {
-  try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; }
-}
-function saveLocal(key, data) {
-  localStorage.setItem(key, JSON.stringify(data));
-}
-
-// ── Main load — returns local cache immediately, syncs in bg ──
-function load(key) { return loadLocal(key); }
-
-// ── Main save — writes to local + queues Supabase upsert ──────
-function save(key, data) {
-  saveLocal(key, data);
-  const table = TABLE[key];
-  if (!table || !_currentUser || !_isOnline) {
-    if (table && !_isOnline) queueOffline(table, data);
-    return;
-  }
-  setSyncing(true);
-  const client = getClient();
-  if (!client) return;
-  const rows = data.map(item => ({...toSnake(item), updated_at: new Date().toISOString(), updated_by: _currentUser.id}));
-  client.from(table).upsert(rows, {onConflict:'id'})
-    .then(({error}) => {
-      setSyncing(false);
-      if (error) { console.error('Sync error', error); setSyncing(false, true); }
-    });
-}
-
-// ── Full fetch from Supabase → overwrite local ────────────────
-async function fetchAll() {
-  const client = getClient();
-  if (!client || !_currentUser) return;
-  setSyncing(true);
-  try {
-    const tables = Object.entries(TABLE);
-    await Promise.all(tables.map(async ([key, table]) => {
-      const { data, error } = await client.from(table).select('*').order('updated_at', {ascending: false});
-      if (error) throw error;
-      if (data && data.length > 0) {
-        const mapped = data.map(fromSnake);
-        saveLocal(key, mapped);
-      }
-    }));
-    setSyncing(false);
-    refreshCurrentPage();
-  } catch (err) {
-    console.error('fetchAll error', err);
-    setSyncing(false, true);
-  }
-}
-
-// ── Real-time subscriptions ───────────────────────────────────
-function subscribeRealtime() {
-  const client = getClient();
-  if (!client) return;
-
-  // Unsubscribe any existing
-  _realtimeSubs.forEach(s => client.removeChannel(s));
-  _realtimeSubs = [];
-
-  Object.entries(TABLE).forEach(([key, table]) => {
-    const channel = client.channel('rt_' + table)
-      .on('postgres_changes', { event: '*', schema: 'public', table }, payload => {
-        handleRealtimeChange(key, table, payload);
-      })
-      .subscribe();
-    _realtimeSubs.push(channel);
-  });
-
-  // Presence channel
-  const presenceCh = client.channel('presence')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'presence' }, () => {
-      renderPresence();
-    })
-    .subscribe();
-  _realtimeSubs.push(presenceCh);
-}
-
-function handleRealtimeChange(key, table, payload) {
-  // Skip our own changes (already applied locally)
-  if (payload.new && payload.new.updated_by === _currentUser?.id) return;
-
-  const local = loadLocal(key);
-  if (payload.eventType === 'DELETE') {
-    saveLocal(key, local.filter(r => r.id !== payload.old.id));
-  } else {
-    const incoming = fromSnake(payload.new);
-    const idx = local.findIndex(r => r.id === incoming.id);
-    if (idx >= 0) local[idx] = incoming; else local.push(incoming);
-    saveLocal(key, local);
-  }
-  toast('🔄 Updated by ' + (payload.new?.updated_by ? 'Michaela' : 'the other device'), 'info', 2000);
-  refreshCurrentPage();
-}
-
-function refreshCurrentPage() {
-  const activePage = document.querySelector('.page.active');
-  if (!activePage) return;
-  const page = activePage.id.replace('page-', '');
-  if (renders[page]) renders[page]();
-  if (page !== 'dashboard') renderDashboard();
-}
-
-// ── Presence ─────────────────────────────────────────────────
-async function updatePresence(page) {
-  const client = getClient();
-  if (!client || !_currentUser) return;
-  const name = _currentUser.user_metadata?.name || _currentUser.email?.split('@')[0] || 'User';
-  await client.from('presence').upsert({
-    user_id: _currentUser.id,
-    name,
-    page,
-    last_seen: new Date().toISOString()
-  }, { onConflict: 'user_id' }).catch(() => {});
-}
-
-async function renderPresence() {
-  const client = getClient();
-  if (!client) return;
-  const bar = document.getElementById('presence-bar');
-  if (!bar) return;
-  const { data } = await client.from('presence')
-    .select('*')
-    .gt('last_seen', new Date(Date.now() - 5 * 60000).toISOString());
-  if (!data) return;
-  bar.innerHTML = data
-    .filter(p => p.user_id !== _currentUser?.id)
-    .map(p => {
-      const initial = (p.name || 'U')[0].toUpperCase();
-      const cls = p.name?.toLowerCase() === 'ivan' ? 'ivan' : p.name?.toLowerCase() === 'michaela' ? 'michaela' : '';
-      return `<div class="presence-dot ${cls}" title="${p.name} is on ${p.page}">
-        ${initial}
-        <div class="presence-tooltip">${p.name} — ${p.page}</div>
-      </div>`;
-    }).join('');
-}
-
-// ── Offline queue ─────────────────────────────────────────────
-function queueOffline(table, data) {
-  _offlineQueue.push({ table, data, at: Date.now() });
-  try { localStorage.setItem('foley_offline_queue', JSON.stringify(_offlineQueue)); } catch {}
-}
-
-async function flushOfflineQueue() {
-  const client = getClient();
-  if (!client || !_currentUser || !_isOnline) return;
-  try {
-    const queued = JSON.parse(localStorage.getItem('foley_offline_queue') || '[]');
-    if (!queued.length) return;
-    for (const item of queued) {
-      const rows = item.data.map(r => ({...toSnake(r), updated_at: new Date().toISOString(), updated_by: _currentUser.id}));
-      await client.from(item.table).upsert(rows, {onConflict:'id'});
-    }
-    localStorage.removeItem('foley_offline_queue');
-    toast('✓ Offline changes synced', 'success');
-  } catch (e) { console.error('Queue flush error', e); }
-}
-
-// ── Sync bar ──────────────────────────────────────────────────
-let _syncTimer = null;
-function setSyncing(active, error=false) {
-  const bar = document.getElementById('sync-bar');
-  if (!bar) return;
-  if (error) { bar.className = 'error'; setTimeout(()=>bar.className='', 3000); return; }
-  bar.className = active ? 'syncing' : '';
-  if (!active && _syncTimer) { clearTimeout(_syncTimer); _syncTimer = null; }
-}
-
-// ── Online/offline detection ──────────────────────────────────
-window.addEventListener('online',  () => { _isOnline = true;  document.getElementById('offline-banner')?.classList.remove('show'); flushOfflineQueue(); fetchAll(); });
-window.addEventListener('offline', () => { _isOnline = false; document.getElementById('offline-banner')?.classList.add('show'); });
-
-// ── AUTH ──────────────────────────────────────────────────────
-function switchAuthTab(tab) {
-  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
-  document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
-  document.getElementById('auth-form-login').style.display = tab === 'login' ? '' : 'none';
-  document.getElementById('auth-form-signup').style.display = tab === 'signup' ? '' : 'none';
-  document.getElementById('auth-error').classList.remove('show');
-}
-
-function showAuthError(msg) {
-  const el = document.getElementById('auth-error');
-  el.textContent = msg;
-  el.classList.add('show');
-}
-
-async function doSignIn() {
-  const client = getClient();
-  if (!client) { showAuthError('Supabase not configured yet — see DEPLOY.md'); return; }
-  const btn = document.getElementById('auth-signin-btn');
-  btn.disabled = true; btn.textContent = 'Signing in…';
-  const email = document.getElementById('auth-email').value.trim();
-  const password = document.getElementById('auth-password').value;
-  const { data, error } = await client.auth.signInWithPassword({ email, password });
-  if (error) { showAuthError(error.message); btn.disabled = false; btn.textContent = 'Sign In'; return; }
-  onSignedIn(data.user);
-}
-
-async function doSignUp() {
-  const client = getClient();
-  if (!client) { showAuthError('Supabase not configured yet — see DEPLOY.md'); return; }
-  const btn = document.getElementById('auth-signup-btn');
-  btn.disabled = true; btn.textContent = 'Creating…';
-  const name = document.getElementById('auth-name').value.trim();
-  const email = document.getElementById('auth-email-su').value.trim();
-  const password = document.getElementById('auth-password-su').value;
-  if (!name) { showAuthError('Please enter your name'); btn.disabled=false; btn.textContent='Create Account'; return; }
-  const { data, error } = await client.auth.signUp({ email, password, options: { data: { name } } });
-  if (error) { showAuthError(error.message); btn.disabled=false; btn.textContent='Create Account'; return; }
-  toast('Account created! Check your email to confirm.', 'success', 5000);
-  switchAuthTab('login');
-  btn.disabled=false; btn.textContent='Create Account';
-}
-
-async function doSignOut() {
-  const client = getClient();
-  if (client) await client.auth.signOut();
-  _currentUser = null;
-  document.getElementById('auth-screen').classList.remove('hidden');
-  document.getElementById('presence-bar').innerHTML = '';
-  document.getElementById('user-chip').innerHTML = '';
-}
-
-function onSignedIn(user) {
-  _currentUser = user;
-  document.getElementById('auth-screen').classList.add('hidden');
-
-  // Render user chip
-  const name = user.user_metadata?.name || user.email?.split('@')[0] || 'User';
-  const initial = name[0].toUpperCase();
-  const cls = name.toLowerCase() === 'ivan' ? 'ivan' : name.toLowerCase() === 'michaela' ? 'michaela' : '';
-  document.getElementById('user-chip').innerHTML = `
-    <div class="user-chip-inner">
-      <div class="user-avatar ${cls}">${initial}</div>
-      <div class="user-name">${name}</div>
-      <button class="sign-out-btn" onclick="doSignOut()">Sign out</button>
-    </div>`;
-
-  // Fetch data, subscribe to real-time, start presence
-  fetchAll();
-  subscribeRealtime();
-  updatePresence('dashboard');
-  setInterval(() => updatePresence(document.querySelector('.page.active')?.id?.replace('page-','')||'dashboard'), 60000);
-  setInterval(renderPresence, 30000);
-  renderPresence();
-}
-
-// ── Check for existing session on load ───────────────────────
-async function checkSession() {
-  const client = getClient();
-  if (!client) {
-    // No Supabase configured — run in local mode
-    document.getElementById('auth-screen').classList.add('hidden');
-    return;
-  }
-  const { data: { session } } = await client.auth.getSession();
-  if (session?.user) {
-    onSignedIn(session.user);
-  }
-  // Listen for auth changes
-  client.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_IN' && session?.user) onSignedIn(session.user);
-    if (event === 'SIGNED_OUT') {
-      _currentUser = null;
-      document.getElementById('auth-screen')?.classList.remove('hidden');
-    }
-  });
-}
-
-// Patch nav to update presence
-const _navOrig = typeof nav !== 'undefined' ? nav : null;
-
-// KEYS defined above in Supabase layer
-const KEYS = {
-  tasks: 'foley_tasks',
-  household: 'foley_household',
-  projects: 'foley_projects',
-  food: 'foley_food',
-  mowers: 'foley_mowers',
 };
 
 function load(key) {
@@ -2222,7 +1686,7 @@ function renderDashboard() {
     <div class="stat-tile ${due7>0?'warn':''}">${tile(due7,'Due in 7 Days')}</div>
     <div class="stat-tile good">${tile(done,'Done')}</div>
     <div class="stat-tile info">${tile(proj.filter(p=>p.status!=='Done'&&p.status!=='Skipped').length,'Open Projects')}</div>
-    <div class="stat-tile ${foodAlerts>0?'danger':''}'">${tile(foodAlerts+restockCount,'Food Alerts')}</div>
+    <div class="stat-tile ${foodAlerts>0?'danger':''}">${tile(foodAlerts+restockCount,'Food Alerts')}</div>
   `;
 
   // upcoming tasks
@@ -2544,7 +2008,7 @@ function openTaskModal(id) {
 
 function saveTask() {
   const name = document.getElementById('task-name').value.trim();
-  if (!name) return alert('Task name is required');
+  if (!name) { toast('Task name is required', 'warn'); return; }
   const tasks = load(KEYS.tasks);
   const id = document.getElementById('task-edit-id').value;
   const obj = {
@@ -2632,7 +2096,7 @@ function openHHModal(id) {
 
 function saveHH() {
   const name = document.getElementById('hh-name').value.trim();
-  if (!name) return alert('Task name required');
+  if (!name) { toast('Task name is required', 'warn'); return; }
   const hh = load(KEYS.household);
   const id = document.getElementById('hh-edit-id').value;
   const obj = {
@@ -2658,6 +2122,7 @@ function deleteHH(id) {
   if (!confirm('Delete this task?')) return;
   save(KEYS.household, load(KEYS.household).filter(h=>h.id!==id));
   renderHousehold();
+  toast('Task deleted', 'warn', 2000);
 }
 
 // ============================================================
@@ -2726,7 +2191,7 @@ function openProjModal(id) {
 
 function saveProject() {
   const name = document.getElementById('proj-name').value.trim();
-  if (!name) return alert('Project name required');
+  if (!name) { toast('Project name is required', 'warn'); return; }
   const proj = load(KEYS.projects);
   const id = document.getElementById('proj-edit-id').value;
   const obj = {
@@ -2751,6 +2216,7 @@ function deleteProject(id) {
   if (!confirm('Delete this project?')) return;
   save(KEYS.projects, load(KEYS.projects).filter(p=>p.id!==id));
   renderProjects();
+  toast('Project deleted', 'warn', 2000);
 }
 
 // ============================================================
@@ -2948,7 +2414,7 @@ function openMowerModal(id) {
 
 function saveMower() {
   const name = document.getElementById('mower-name').value.trim();
-  if (!name) return alert('Mower name required');
+  if (!name) { toast('Mower name is required', 'warn'); return; }
   const mowers = load(KEYS.mowers);
   const id = document.getElementById('mower-edit-id').value;
   const obj = {
@@ -2975,6 +2441,7 @@ function deleteMower(id) {
   if (!confirm('Delete this mower?')) return;
   save(KEYS.mowers, load(KEYS.mowers).filter(m=>m.id!==id));
   renderMowers();
+  toast('Mower deleted', 'warn', 2000);
 }
 
 // ============================================================
@@ -3052,7 +2519,7 @@ function openFoodModal(id) {
 
 function saveFood() {
   const name = document.getElementById('food-name').value.trim();
-  if (!name) return alert('Item name required');
+  if (!name) { toast('Item name is required', 'warn'); return; }
   const food = load(KEYS.food);
   const id = document.getElementById('food-edit-id').value;
   const obj = {
@@ -3078,6 +2545,7 @@ function deleteFood(id) {
   if (!confirm('Delete this item?')) return;
   save(KEYS.food, load(KEYS.food).filter(f=>f.id!==id));
   renderFood();
+  toast('Item deleted', 'warn', 2000);
 }
 
 // ============================================================
@@ -3087,16 +2555,17 @@ function closeModal(id) {
   document.getElementById(id).classList.remove('open');
 }
 
-document.querySelectorAll('.modal-overlay').forEach(el => {
-  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+// Click outside modal to close — use delegation so it catches all modals including late-added ones
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-overlay') && e.target.classList.contains('open')) {
+    e.target.classList.remove('open');
+  }
 });
 
 
 // ============================================================
 // PLANNER — CALENDAR
 // ============================================================
-KEYS.events = 'foley_events';
-
 const CAT_LABELS = {
   property:'Property', household:'Household', appointment:'Appointment',
   personal:'Personal', seasonal:'Seasonal', garden:'Garden', other:'Other'
@@ -3191,17 +2660,17 @@ function renderCalendar() {
   const today = todayISO();
 
   // Build date range for event lookup
-  const rangeFrom = isoDate(calYear, calMonth-1, daysInPrev - firstDay + 1);
   const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
-  const rangeTo = (() => {
-    const rem = totalCells - firstDay - daysInMonth;
-    return isoDate(calYear, calMonth+1, rem);
-  })();
+  // rangeTo unused — removed
 
   const events = load(KEYS.events);
+  const prevYear = calMonth === 0 ? calYear - 1 : calYear;
+  const prevMon  = calMonth === 0 ? 11 : calMonth - 1;
+  const nextYear = calMonth === 11 ? calYear + 1 : calYear;
+  const nextMon  = calMonth === 11 ? 0 : calMonth + 1;
   const expanded = expandEvents(events,
-    isoDate(calYear, calMonth-1, 1),
-    isoDate(calYear, calMonth+1, 28)
+    isoDate(prevYear, prevMon, 1),
+    isoDate(nextYear, nextMon, 28)
   );
   // also include multi-day spanning
   events.forEach(ev => {
@@ -3278,12 +2747,14 @@ function calSelectDate(iso) {
 function calPrev() {
   calMonth--;
   if (calMonth < 0) { calMonth = 11; calYear--; }
+  calSelectedDate = null;
   renderCalendar();
 }
 
 function calNext() {
   calMonth++;
   if (calMonth > 11) { calMonth = 0; calYear++; }
+  calSelectedDate = null;
   renderCalendar();
 }
 
@@ -3407,9 +2878,9 @@ function openEventModal(id, prefillDate) {
 
 function saveEvent() {
   const title = document.getElementById('event-title').value.trim();
-  if (!title) return alert('Title is required');
+  if (!title) { toast('Event title is required', 'warn'); return; }
   const start = document.getElementById('event-start').value;
-  if (!start) return alert('Start date is required');
+  if (!start) { toast('Start date is required', 'warn'); return; }
 
   const events = load(KEYS.events);
   const id = document.getElementById('event-edit-id').value || uid();
@@ -3506,9 +2977,6 @@ const PAGE_TITLES = [
 ];
 
 // ── Storage keys ─────────────────────────────────────────────
-KEYS.navOrder   = 'foley_nav_order';
-KEYS.customColors = 'foley_custom_colors';
-KEYS.customText = 'foley_custom_text';
 
 // ── Apply saved customizations on load ───────────────────────
 function applyAllCustomizations() {
@@ -3691,7 +3159,7 @@ function updateNavVisible(i, val) {
 }
 function saveNavOrder() {
   applyNavFromStorage();
-  alert('Nav order saved!');
+  toast('Nav order saved', 'success');
 }
 function resetNavOrder() {
   if (!confirm('Reset nav to default order?')) return;
@@ -3916,8 +3384,14 @@ document.addEventListener('keydown', e => {
   if (k === 't' && !e.ctrlKey && !e.metaKey) { nav('tasks'); return; }
   if (k === 'p' && !e.ctrlKey && !e.metaKey) { nav('planner'); return; }
   if (k === 'f') {
-    const search = document.getElementById('tasks-search');
-    if (search) { nav('tasks'); setTimeout(() => search.focus(), 50); return; }
+    // Focus the first visible text input on the current page
+    const page = document.querySelector('.page.active');
+    const input = page?.querySelector('input[type=text], input[type=search]');
+    if (input) { input.focus(); return; }
+    // Fall back to quick-add task on dashboard
+    const quickTask = document.getElementById('quick-task');
+    if (quickTask) { nav('dashboard'); setTimeout(() => quickTask.focus(), 50); }
+    return;
   }
   if (k === 'n') {
     const activePage = document.querySelector('.page.active');
@@ -3950,26 +3424,16 @@ function wrapWithToast(fnName, msg) {
 }
 // Wrap after init
 setTimeout(() => {
-  wrapWithToast('saveTask',    '✓ Task saved');
-  wrapWithToast('saveHH',      '✓ Task saved');
-  wrapWithToast('saveProject', '✓ Project saved');
-  wrapWithToast('saveFood',    '✓ Item saved');
-  wrapWithToast('saveMower',   '✓ Mower updated');
-  wrapWithToast('saveEvent',   '✓ Event saved');
-  wrapWithToast('saveIdentity','✓ Identity saved');
+  wrapWithToast('saveTask', 'Task saved');
+  wrapWithToast('saveHH', 'Task saved');
+  wrapWithToast('saveProject', 'Project saved');
+  wrapWithToast('saveFood', 'Item saved');
+  wrapWithToast('saveMower', 'Mower updated');
+  wrapWithToast('saveEvent', 'Event saved');
+  wrapWithToast('saveIdentity', 'Identity saved');
 }, 100);
 
-// ── Confirm deletes with toast feedback ──────────────────────
-const _origDeleteTask = window.deleteTask;
-if (typeof _origDeleteTask === 'function') {
-  window.deleteTask = function(id) {
-    if (!confirm('Delete this task?')) return;
-    const tasks = load(KEYS.tasks).filter(t => t.id !== id);
-    save(KEYS.tasks, tasks);
-    renderTasks();
-    toast('Task deleted', 'warn', 2000);
-  };
-}
+// deleteTask handled directly in renderTasks
 
 // ── Search highlight helper ───────────────────────────────────
 function highlight(text, query) {
@@ -4070,7 +3534,7 @@ function quickAddTask() {
   const name = (input.value || '').trim();
   if (!name) { input.focus(); return; }
   const tasks = load(KEYS.tasks);
-  tasks.push({ id:uid(), name, cat:'Seasonal Prep', area:'', freq:'As Needed',
+  tasks.push({ id:uid(), name, cat:'General', area:'', freq:'As Needed',
     priority:'Medium', status:'Not Started', who:'Both',
     lastDone:'', time:'', equipment:'', notes:'' });
   save(KEYS.tasks, tasks);
@@ -4082,48 +3546,51 @@ function quickAddTask() {
 // ============================================================
 // INIT
 // ============================================================
-// Register service worker
+seedData();
+applyAllCustomizations();
+renderDashboard();
+const _pwaPage = new URLSearchParams(location.search).get('page');
+if (_pwaPage && document.getElementById('page-' + _pwaPage)) nav(_pwaPage);
+
+// ── PWA: Service Worker + Install Prompt ─────────────────────
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js')
-    .then(() => console.log('SW registered'))
-    .catch(e => console.log('SW error', e));
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(() => console.log('Service worker registered'))
+      .catch(e => console.warn('SW registration failed:', e));
+  });
 }
 
-// Handle PWA install prompt
-let _deferredPrompt = null;
+let _deferredInstallPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
-  _deferredPrompt = e;
-  // Show install banner after 3 seconds if not already installed
-  setTimeout(showInstallBanner, 3000);
+  _deferredInstallPrompt = e;
+  setTimeout(showInstallBanner, 4000);
 });
 
 function showInstallBanner() {
-  if (!_deferredPrompt) return;
+  if (!_deferredInstallPrompt || document.getElementById('install-banner')) return;
   const banner = document.createElement('div');
   banner.id = 'install-banner';
-  banner.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--forest);color:var(--cream);padding:14px 20px;border-radius:10px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:14px;z-index:9000;font-size:13px;max-width:90vw';
-  banner.innerHTML = `<span>📱 Add Foley Property to your home screen</span><button onclick="installPWA()" style="background:var(--cream);color:var(--forest);border:none;padding:6px 14px;border-radius:6px;font-weight:600;cursor:pointer;font-size:12px">Install</button><button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--sage-light);cursor:pointer;font-size:16px">✕</button>`;
+  banner.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--forest);color:var(--cream);padding:14px 20px;border-radius:10px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:14px;z-index:9000;font-size:13px;max-width:90vw;white-space:nowrap';
+  banner.innerHTML = "<span>📱 Add Foley Property to your home screen</span>"
+    + "<button onclick='installPWA()' style='background:var(--cream);color:var(--forest);border:none;padding:6px 14px;border-radius:6px;font-weight:600;cursor:pointer;font-size:12px;font-family:inherit'>Install</button>"
+    + "<button onclick='document.getElementById("install-banner").remove()' style='background:none;border:none;color:var(--sage-light);cursor:pointer;font-size:18px;line-height:1'>✕</button>";
   document.body.appendChild(banner);
 }
 
 async function installPWA() {
-  if (!_deferredPrompt) return;
-  _deferredPrompt.prompt();
-  const { outcome } = await _deferredPrompt.userChoice;
-  _deferredPrompt = null;
+  if (!_deferredInstallPrompt) return;
+  _deferredInstallPrompt.prompt();
+  const { outcome } = await _deferredInstallPrompt.userChoice;
+  _deferredInstallPrompt = null;
   document.getElementById('install-banner')?.remove();
-  if (outcome === 'accepted') toast('App installed!', 'success');
+  if (outcome === 'accepted') toast('App installed! Find it on your home screen.', 'success', 3000);
 }
 
-// Handle URL page param
-const _urlPage = new URLSearchParams(location.search).get('page');
-
-seedData();
-applyAllCustomizations();
-checkSession().then(() => {
-  renderDashboard();
-  if (_urlPage && document.getElementById('page-' + _urlPage)) nav(_urlPage);
+window.addEventListener('appinstalled', () => {
+  _deferredInstallPrompt = null;
+  document.getElementById('install-banner')?.remove();
 });
 </script>
 
