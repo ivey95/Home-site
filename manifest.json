@@ -1,0 +1,46 @@
+{
+  "name": "Foley Property",
+  "short_name": "Foley",
+  "description": "Ivan & Michaela's property tracker — tasks, food, planner & more",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#1a2e1a",
+  "theme_color": "#1a2e1a",
+  "categories": ["lifestyle", "productivity"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "url": "/?page=dashboard",
+      "description": "Open the dashboard"
+    },
+    {
+      "name": "Planner",
+      "short_name": "Planner",
+      "url": "/?page=planner",
+      "description": "Open the calendar"
+    },
+    {
+      "name": "Due Soon",
+      "short_name": "Due Soon",
+      "url": "/?page=duesoon",
+      "description": "See tasks due soon"
+    }
+  ]
+}
