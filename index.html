@@ -1302,6 +1302,13 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
   }
 }
 
+
+@media (max-width: 768px) {
+  /* Hide desktop-only settings on mobile */
+  #settings-sidebar-width-row { display: none !important; }
+  .settings-grid { grid-template-columns: 1fr !important; }
+}
+
 </style>
 </head>
 <body>
@@ -1722,7 +1729,7 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
             <span id="fontsize-label" style="font-size:12px;width:28px">14px</span>
           </div>
         </div>
-        <div class="settings-row">
+        <div class="settings-row" id="settings-sidebar-width-row">
           <div><div class="settings-label">Sidebar Width</div></div>
           <div style="display:flex;align-items:center;gap:10px">
             <input type="range" id="custom-sidebar-width" min="180" max="300" value="220" style="width:100px" oninput="applySidebarWidth(this.value)">
@@ -2081,11 +2088,18 @@ function mobNav(page) {
   window.scrollTo(0, 0);
 
   // Render — page must be visible before render functions run
-  if (page === 'more')      { renderMobMore(); return; }
-  if (page === 'dashboard') { renderMobDashboard(); return; }
-  if (page === 'duesoon')   { renderMobDueSoon(); return; }
-  if (page === 'tasks')     { renderMobTasks(); return; }
-  if (page === 'food')      { renderMobFood(); return; }
+  if (page === 'more')       { renderMobMore(); return; }
+  if (page === 'dashboard')  { renderMobDashboard(); return; }
+  if (page === 'duesoon')    { renderMobDueSoon(); return; }
+  if (page === 'tasks')      { renderMobTasks(); return; }
+  if (page === 'food')       { renderMobFood(); return; }
+  if (page === 'household')  { renderMobHousehold(); return; }
+  if (page === 'projects')   { renderMobProjects(); return; }
+  if (page === 'mowers')     { renderMobMowers(); return; }
+  if (page === 'statistics') { renderMobStatistics(); return; }
+  if (page === 'garden')     { renderMobGarden(); return; }
+  if (page === 'planning')   { renderMobPlanning(); return; }
+  if (page === 'notes')      { renderMobNotes(); return; }
   renders[page] && renders[page]();
 }
 
@@ -2215,28 +2229,103 @@ function renderMobDashboard() {
     statsEl?.after(qa);
   }
 
-  // Overdue tasks
-  const tbody = document.querySelector('#dash-tasks-table tbody');
-  if (tbody) {
-    const upcoming = [...overdue, ...due7]
-      .slice(0, 8)
-      .map(t => {
+  // Build full dashboard content below stats
+  // Remove old desktop content and replace with mobile cards
+  const existingMobContent = document.getElementById('mob-dash-content');
+  if (existingMobContent) existingMobContent.remove();
+
+  // Also hide desktop table
+  const tableWrap = document.querySelector('#page-dashboard .tbl-wrap');
+  if (tableWrap) tableWrap.style.display = 'none';
+
+  // Hide desktop food/project sections
+  document.querySelectorAll('#page-dashboard .section-label, #page-dashboard #dash-food, #page-dashboard #dash-projects').forEach(el => el.style.display = 'none');
+
+  // Build mobile content
+  const foodAlertItems = food.filter(f => ['Expired','Use Soon','Low'].includes(foodStatus(f)) && !f.usedUp);
+  const highProjects = proj.filter(p => p.priority === 'High' && p.status !== 'Done' && p.status !== 'Skipped').slice(0, 4);
+  const upcomingTasks = [...overdue, ...due7].slice(0, 8);
+
+  const statusColor = { 'Expired':'mob-food-expired','Use Soon':'mob-food-usesoon','Low':'mob-food-low' };
+
+  const mobContent = document.createElement('div');
+  mobContent.id = 'mob-dash-content';
+  mobContent.innerHTML = `
+    ${upcomingTasks.length ? `
+      <div class="mob-section">Upcoming & Overdue</div>
+      ${upcomingTasks.map(t => {
         const due = mobDueLabel(t);
-        return `<div class="mob-card" onclick="mobTaskDetail('${t.id}')">
-          <div class="mob-card-body">
-            <div class="mob-card-title">${t.name}</div>
+        return \`<div class="mob-card">
+          <div class="mob-card-body" onclick="this.nextElementSibling.classList.toggle('open')">
+            <div class="mob-card-title">\${t.name}</div>
             <div class="mob-card-meta">
-              ${mobPriorityPill(t.priority)}
-              ${mobWhoPill(t.who)}
-              <span class="mob-due ${due.cls}">${due.text}</span>
+              \${mobPriorityPill(t.priority)}
+              \${mobWhoPill(t.who)}
+              <span class="mob-due \${due.cls}">\${due.text}</span>
             </div>
           </div>
-        </div>`;
-      }).join('') || '<div style="padding:20px;text-align:center;color:var(--muted);font-style:italic">All caught up! 🎉</div>';
+          <div class="mob-card-detail">
+            \${t.area ? \`<div class="mob-card-detail-row"><span class="mob-card-detail-label">Area</span><span>\${t.area}</span></div>\` : ''}
+            \${t.freq ? \`<div class="mob-card-detail-row"><span class="mob-card-detail-label">Frequency</span><span>\${t.freq}</span></div>\` : ''}
+            <div style="margin-top:8px;margin-bottom:4px">
+              <button style="background:var(--forest);color:var(--cream);border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer" onclick="mobMarkTaskDone('\${t.id}')">✓ Mark Done</button>
+            </div>
+          </div>
+        </div>\`;
+      }).join('')}
+    ` : '<div style="padding:20px;text-align:center;color:var(--muted);font-style:italic;margin-bottom:8px">All caught up! 🎉</div>'}
 
-    // Replace table with cards
-    const tableWrap = document.querySelector('#page-dashboard .tbl-wrap') || tbody.closest('.tbl-wrap');
-    if (tableWrap) tableWrap.outerHTML = `<div id="mob-dash-tasks" class="mob-only">${upcoming}</div>`;
+    ${foodAlertItems.length ? `
+      <div class="mob-section">⚠ Food Alerts (${foodAlertItems.length})</div>
+      ${foodAlertItems.map(f => {
+        const st = foodStatus(f);
+        const cls = statusColor[st] || 'mob-food-instock';
+        return \`<div class="mob-card">
+          <div class="mob-card-body" style="display:flex;align-items:center;gap:12px">
+            <div style="flex:1">
+              <div class="mob-card-title" style="margin-bottom:4px">\${f.name}</div>
+              <div style="font-size:12px;color:var(--muted)">\${f.type} · \${f.location||'—'} · \${f.qty} \${f.unit}</div>
+            </div>
+            <span class="mob-food-status \${cls}">\${st}</span>
+          </div>
+        </div>\`;
+      }).join('')}
+    ` : ''}
+
+    ${highProjects.length ? `
+      <div class="mob-section">High Priority Projects</div>
+      ${highProjects.map(p => `
+        <div class="mob-card">
+          <div class="mob-card-body">
+            <div style="display:flex;align-items:flex-start;gap:8px">
+              <div class="mob-card-title" style="flex:1">${p.name}</div>
+              <div class="mob-proj-cost">$${(p.cost||0).toLocaleString()}</div>
+            </div>
+            <div class="mob-card-meta" style="margin-top:6px">
+              ${mobWhoPill(p.who)}
+              <span class="mob-pill mob-pill-default">${p.season}</span>
+              <span class="mob-pill mob-pill-default">${p.status}</span>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    ` : ''}
+  `;
+
+  // Append after stats
+  const statsEl2 = document.getElementById('dash-stats');
+  if (statsEl2) statsEl2.after(mobContent);
+
+  // Quick add bar
+  const existingQA = document.getElementById('mob-quick-add-bar');
+  if (!existingQA && statsEl2) {
+    const qa = document.createElement('div');
+    qa.id = 'mob-quick-add-bar';
+    qa.className = 'mob-quick-add';
+    qa.style.marginTop = '12px';
+    qa.innerHTML = \`<input type="text" id="mob-quick-task" placeholder="Quick-add a task…" onkeydown="if(event.key==='Enter')mobQuickAdd()"><button onclick="mobQuickAdd()">Add</button>\`;
+    statsEl2.after(qa);
+    mobContent.before(qa);
   }
 }
 
@@ -3029,14 +3118,15 @@ function saveTask() {
   else tasks.push(obj);
   save(KEYS.tasks, tasks);
   closeModal('modal-task');
-  renderTasks();
+  if (IS_MOBILE()) renderMobTasks(); else renderTasks();
 }
 
 function deleteTask(id) {
   if (!confirm('Delete this task?')) return;
   const tasks = load(KEYS.tasks).filter(t=>t.id!==id);
   save(KEYS.tasks, tasks);
-  renderTasks();
+  if (IS_MOBILE()) renderMobTasks(); else renderTasks();
+  toast('Task deleted', 'warn', 2000);
 }
 
 // ============================================================
@@ -3044,7 +3134,8 @@ function deleteTask(id) {
 // ============================================================
 function renderHousehold() {
   const hh = load(KEYS.household);
-  const who = document.getElementById('hh-who').value;
+  const whoEl = document.getElementById('hh-who');
+  const who = whoEl ? whoEl.value : '';
   const filtered = who ? hh.filter(h=>h.who===who) : hh;
   const inside = filtered.filter(h=>h.type==='Inside');
   const outside = filtered.filter(h=>h.type!=='Inside');
@@ -3068,14 +3159,14 @@ function renderHousehold() {
     `).join('') : '<div class="empty-state">No tasks here</div>';
   }
 
-  renderSection(inside, 'hh-inside');
-  renderSection(outside, 'hh-outside');
+  if (document.getElementById('hh-inside')) renderSection(inside, 'hh-inside');
+  if (document.getElementById('hh-outside')) renderSection(outside, 'hh-outside');
 }
 
 function toggleHH(id, val) {
   const hh = load(KEYS.household);
   const h = hh.find(x=>x.id===id);
-  if (h) { h.done = val; if (val) h.lastDone = today(); save(KEYS.household, hh); }
+  if (h) { h.done = val; if (val) h.lastDone = today(); save(KEYS.household, hh); if (IS_MOBILE()) renderMobHousehold(); else renderHousehold(); }
 }
 
 function openHHModal(id) {
@@ -3116,13 +3207,13 @@ function saveHH() {
   else hh.push(obj);
   save(KEYS.household, hh);
   closeModal('modal-hh');
-  renderHousehold();
+  if (IS_MOBILE()) renderMobHousehold(); else renderHousehold();
 }
 
 function deleteHH(id) {
   if (!confirm('Delete this task?')) return;
   save(KEYS.household, load(KEYS.household).filter(h=>h.id!==id));
-  renderHousehold();
+  if (IS_MOBILE()) renderMobHousehold(); else renderHousehold();
   toast('Task deleted', 'warn', 2000);
 }
 
@@ -3131,14 +3222,19 @@ function deleteHH(id) {
 // ============================================================
 function renderProjects() {
   const proj = load(KEYS.projects);
-  const statusFilter = document.getElementById('proj-status').value;
+  const statusEl = document.getElementById('proj-status');
+  const statusFilter = statusEl ? statusEl.value : '';
   const filtered = statusFilter ? proj.filter(p=>p.status===statusFilter) : proj;
   const open = proj.filter(p=>p.status!=='Done'&&p.status!=='Skipped');
   const highOpen = open.filter(p=>p.priority==='High');
-  document.getElementById('proj-total-cost').textContent = '$' + open.reduce((s,p)=>s+Number(p.cost||0),0).toLocaleString();
-  document.getElementById('proj-high-cost').textContent = '$' + highOpen.reduce((s,p)=>s+Number(p.cost||0),0).toLocaleString();
+  const ptc = document.getElementById('proj-total-cost');
+  const phc = document.getElementById('proj-high-cost');
+  if (ptc) ptc.textContent = '$' + open.reduce((s,p)=>s+Number(p.cost||0),0).toLocaleString();
+  if (phc) phc.textContent = '$' + highOpen.reduce((s,p)=>s+Number(p.cost||0),0).toLocaleString();
 
-  document.getElementById('projects-grid').innerHTML = filtered.map(p => {
+  const pgEl = document.getElementById('projects-grid');
+  if (!pgEl) return;
+  pgEl.innerHTML = filtered.map(p => {
     const statusColor = {Done:'var(--forest-light)',Skipped:'var(--muted)','In Progress':'#3b5bdb','Not Started':'var(--umber)',Scheduled:'var(--amber)'}[p.status]||'var(--muted)';
     return `<div class="card" style="border-top:4px solid ${p.priority==='High'?'var(--red)':p.priority==='Medium'?'var(--amber)':'var(--sage)'}">
       <div class="card-header" style="flex-direction:column;align-items:flex-start;gap:6px">
@@ -3170,7 +3266,7 @@ function renderProjects() {
 function updateProjStatus(id, val) {
   const proj = load(KEYS.projects);
   const p = proj.find(x=>x.id===id);
-  if (p) { p.status = val; save(KEYS.projects, proj); renderProjects(); }
+  if (p) { p.status = val; save(KEYS.projects, proj); if (IS_MOBILE()) renderMobProjects(); else renderProjects(); }
 }
 
 function openProjModal(id) {
@@ -3210,13 +3306,13 @@ function saveProject() {
   else proj.push(obj);
   save(KEYS.projects, proj);
   closeModal('modal-proj');
-  renderProjects();
+  if (IS_MOBILE()) renderMobProjects(); else renderProjects();
 }
 
 function deleteProject(id) {
   if (!confirm('Delete this project?')) return;
   save(KEYS.projects, load(KEYS.projects).filter(p=>p.id!==id));
-  renderProjects();
+  if (IS_MOBILE()) renderMobProjects(); else renderProjects();
   toast('Project deleted', 'warn', 2000);
 }
 
@@ -3369,7 +3465,9 @@ function renderMowers() {
   const mowers = load(KEYS.mowers);
   const statusColor = {Active:'var(--forest-light)',Backup:'var(--umber)',Seasonal:'var(--amber)',Repair:'var(--red)'};
 
-  document.getElementById('mower-grid').innerHTML = mowers.map(m => `
+  const mgEl = document.getElementById('mower-grid');
+  if (!mgEl) return;
+  mgEl.innerHTML = mowers.map(m => `
     <div class="card">
       <div class="card-header">
         <span>${m.name} — <span style="font-weight:400;font-size:12px">${m.type}</span></span>
@@ -3435,13 +3533,13 @@ function saveMower() {
   else mowers.push(obj);
   save(KEYS.mowers, mowers);
   closeModal('modal-mower');
-  renderMowers();
+  if (IS_MOBILE()) renderMobMowers(); else renderMowers();
 }
 
 function deleteMower(id) {
   if (!confirm('Delete this mower?')) return;
   save(KEYS.mowers, load(KEYS.mowers).filter(m=>m.id!==id));
-  renderMowers();
+  if (IS_MOBILE()) renderMobMowers(); else renderMowers();
   toast('Mower deleted', 'warn', 2000);
 }
 
@@ -3450,7 +3548,8 @@ function deleteMower(id) {
 // ============================================================
 function renderFood() {
   const food = load(KEYS.food);
-  const filter = document.getElementById('food-filter').value;
+  const filterEl = document.getElementById('food-filter');
+  const filter = filterEl ? filterEl.value : '';
   const filtered = filter ? food.filter(f=>f.type===filter) : food;
 
   const sections = [
@@ -3460,7 +3559,9 @@ function renderFood() {
     ['Emergency / Bulk Storage', 'Emergency Storage', 'food-emergency'],
   ];
 
-  document.getElementById('food-content').innerHTML = sections.map(([label, type, cls]) => {
+  const fcEl = document.getElementById('food-content');
+  if (!fcEl) return;
+  fcEl.innerHTML = sections.map(([label, type, cls]) => {
     const items = filtered.filter(f => f.type === type);
     if (!items.length && filter && filter !== type) return '';
     return `
@@ -3539,13 +3640,13 @@ function saveFood() {
   else food.push(obj);
   save(KEYS.food, food);
   closeModal('modal-food');
-  renderFood();
+  if (IS_MOBILE()) renderMobFood(); else renderFood();
 }
 
 function deleteFood(id) {
   if (!confirm('Delete this item?')) return;
   save(KEYS.food, load(KEYS.food).filter(f=>f.id!==id));
-  renderFood();
+  if (IS_MOBILE()) renderMobFood(); else renderFood();
   toast('Item deleted', 'warn', 2000);
 }
 
@@ -4558,6 +4659,376 @@ function quickAddTask() {
 // ============================================================
 // INIT
 // ============================================================
+
+
+// ============================================================
+// MOBILE CARD RENDERS — all table-based pages
+// ============================================================
+
+// ── Shared: replace page content with mobile cards ───────────
+function mobReplacePage(pageId, content) {
+  const page = document.getElementById(pageId);
+  if (!page) return;
+  // Keep the page-header, replace everything after it
+  const header = page.querySelector('.page-header');
+  // Remove all children after header
+  while (page.lastChild && page.lastChild !== header) {
+    page.removeChild(page.lastChild);
+  }
+  const wrap = document.createElement('div');
+  wrap.className = 'mob-page-content';
+  wrap.style.cssText = 'padding:0;overflow-x:hidden;width:100%';
+  wrap.innerHTML = content;
+  page.appendChild(wrap);
+}
+
+// ── HOUSEHOLD ────────────────────────────────────────────────
+function renderMobHousehold() {
+  const hh = load(KEYS.household);
+  const inside = hh.filter(t => t.type === 'Inside' || t.type === 'Mixed');
+  const outside = hh.filter(t => t.type === 'Outside');
+
+  function hhCard(t) {
+    const checked = t.done;
+    return `<div class="mob-check-row" onclick="mobToggleHH('${t.id}')">
+      <div class="mob-check-box ${checked ? 'checked' : ''}">${checked ? '✓' : ''}</div>
+      <div class="mob-check-info">
+        <div class="mob-check-title ${checked ? 'done' : ''}">${t.name}</div>
+        <div class="mob-check-sub">${t.freq} · ${t.who}${t.lastDone ? ' · Done '+fmtDate(t.lastDone) : ''}</div>
+      </div>
+      <button class="mob-card-action" style="flex:none;padding:6px 10px;border-radius:8px;font-size:12px;background:var(--cream-dark);border:none;font-family:inherit;cursor:pointer" onclick="event.stopPropagation();openHHModal('${t.id}')">Edit</button>
+    </div>`;
+  }
+
+  const content = `
+    <div style="margin-bottom:12px">
+      <button class="btn btn-primary" style="width:100%;padding:13px;font-size:15px" onclick="openHHModal()">+ Add Task</button>
+    </div>
+    <div class="mob-section">Inside Tasks (${inside.length})</div>
+    ${inside.length ? inside.map(hhCard).join('') : '<div class="agenda-empty">No inside tasks</div>'}
+    <div class="mob-section">Outside Tasks (${outside.length})</div>
+    ${outside.length ? outside.map(hhCard).join('') : '<div class="agenda-empty">No outside tasks</div>'}
+  `;
+  mobReplacePage('page-household', content);
+}
+
+function mobToggleHH(id) {
+  const hh = load(KEYS.household);
+  const i = hh.findIndex(t => t.id === id);
+  if (i < 0) return;
+  hh[i].done = !hh[i].done;
+  if (hh[i].done) hh[i].lastDone = today();
+  save(KEYS.household, hh);
+  renderMobHousehold();
+}
+
+// ── PROJECTS ─────────────────────────────────────────────────
+let _mobProjFilter = '';
+function renderMobProjects() {
+  const proj = load(KEYS.projects);
+  const filtered = _mobProjFilter ? proj.filter(p => p.status === _mobProjFilter) : proj;
+  const open = proj.filter(p => p.status !== 'Done' && p.status !== 'Skipped');
+  const totalCost = open.reduce((s, p) => s + (p.cost || 0), 0);
+
+  const statusColor = {
+    'Not Started': 'mob-pill-default',
+    'In Progress': 'mob-pill-progress',
+    'Scheduled':   'mob-pill-default',
+    'Done':        'mob-pill-done',
+    'Skipped':     'mob-pill-default',
+  };
+
+  const content = `
+    <div class="mob-stat-row" style="margin-bottom:14px">
+      <div class="mob-stat">
+        <div class="mob-stat-val">${open.length}</div>
+        <div class="mob-stat-lbl">Open</div>
+      </div>
+      <div class="mob-stat">
+        <div class="mob-stat-val" style="font-size:20px">$${totalCost.toLocaleString()}</div>
+        <div class="mob-stat-lbl">Est. Cost</div>
+      </div>
+    </div>
+    <div class="mob-filters">
+      ${['','Not Started','In Progress','Done','Skipped'].map(s =>
+        `<button class="mob-filter-chip ${_mobProjFilter===s?'active':''}" onclick="_mobProjFilter='${s}';renderMobProjects()">${s||'All'}</button>`
+      ).join('')}
+    </div>
+    <div style="margin-bottom:12px">
+      <button class="btn btn-primary" style="width:100%;padding:13px;font-size:15px" onclick="openProjModal()">+ Add Project</button>
+    </div>
+    ${filtered.map(p => `
+      <div class="mob-card">
+        <div class="mob-card-body" onclick="this.nextElementSibling.classList.toggle('open')">
+          <div style="display:flex;align-items:flex-start;gap:8px">
+            <div class="mob-card-title" style="flex:1;${p.status==='Done'||p.status==='Skipped'?'opacity:0.5;text-decoration:line-through':''}">${p.name}</div>
+            <div class="mob-proj-cost">$${(p.cost||0).toLocaleString()}</div>
+          </div>
+          <div class="mob-card-meta" style="margin-top:6px">
+            ${mobPriorityPill(p.priority)}
+            <span class="mob-pill ${statusColor[p.status]||'mob-pill-default'}">${p.status}</span>
+            ${mobWhoPill(p.who)}
+            <span class="mob-pill mob-pill-default">${p.season}</span>
+          </div>
+          ${p.notes ? `<div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.4">${p.notes}</div>` : ''}
+        </div>
+        <div class="mob-card-actions">
+          <button class="mob-card-action" onclick="openProjModal('${p.id}')">Edit</button>
+          <button class="mob-card-action danger" onclick="deleteProject('${p.id}')">Delete</button>
+        </div>
+      </div>`).join('') || '<div class="agenda-empty">No projects match</div>'}
+  `;
+  mobReplacePage('page-projects', content);
+}
+
+// ── MOWERS ───────────────────────────────────────────────────
+function renderMobMowers() {
+  const mowers = load(KEYS.mowers);
+  const statusColor = {Active:'var(--forest-light)',Backup:'var(--umber)',Seasonal:'var(--amber)',Repair:'var(--red)'};
+
+  function serviceRow(label, dateStr) {
+    if (!dateStr) return `<div class="mob-service-item"><div class="mob-service-label">${label}</div><div class="mob-service-val" style="color:var(--muted)">—</div></div>`;
+    const d = new Date(dateStr+'T00:00:00');
+    const days = Math.round((Date.now() - d)/86400000);
+    const cls = days > 180 ? 'overdue' : '';
+    return `<div class="mob-service-item"><div class="mob-service-label">${label}</div><div class="mob-service-val ${cls}">${fmtDate(dateStr)} <span style="color:var(--muted)">(${days}d)</span></div></div>`;
+  }
+
+  const content = `
+    <div style="margin-bottom:12px">
+      <button class="btn btn-primary" style="width:100%;padding:13px;font-size:15px" onclick="openMowerModal()">+ Add Mower</button>
+    </div>
+    ${mowers.map(m => `
+      <div class="mob-card" style="margin-bottom:14px">
+        <div style="background:var(--forest);padding:14px 16px;display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--cream)">${m.name}</div>
+            <div style="font-size:12px;color:var(--sage-light)">${m.type||'—'}</div>
+          </div>
+          <span style="font-size:12px;font-weight:700;color:${statusColor[m.status]||'var(--sage-light)'};background:rgba(0,0,0,0.2);padding:4px 10px;border-radius:20px">${m.status}</span>
+        </div>
+        <div class="mob-card-body">
+          ${m.area ? `<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Area: ${m.area}</div>` : ''}
+          <div class="mob-service-grid">
+            ${serviceRow('Oil change', m.oil)}
+            ${serviceRow('Blade sharpen', m.blade)}
+            ${serviceRow('Battery check', m.battery)}
+            ${serviceRow('Belt/tire', m.belt)}
+          </div>
+          ${m.hours ? `<div style="font-size:12px;color:var(--muted);margin-top:8px">Hours: ${m.hours}</div>` : ''}
+          ${m.notes ? `<div style="font-size:12px;color:var(--muted);margin-top:6px;padding:8px;background:var(--cream);border-radius:6px">${m.notes}</div>` : ''}
+        </div>
+        <div class="mob-card-actions">
+          <button class="mob-card-action" onclick="openMowerModal('${m.id}')">✏ Update Service</button>
+          <button class="mob-card-action danger" onclick="deleteMower('${m.id}')">Delete</button>
+        </div>
+      </div>`).join('') || '<div class="agenda-empty">No mowers logged yet</div>'}
+  `;
+  mobReplacePage('page-mowers', content);
+}
+
+// ── STATISTICS (simplified on mobile) ────────────────────────
+function renderMobStatistics() {
+  const tasks = load(KEYS.tasks);
+  const hh    = load(KEYS.household);
+  const proj  = load(KEYS.projects);
+  const food  = load(KEYS.food);
+
+  const overdue = tasks.filter(t => { const nd=calcNextDue(t.lastDone,t.freq); return nd&&daysDiff(nd)<0&&t.status!=='Done'&&t.status!=='Skipped'; }).length;
+  const done    = tasks.filter(t => t.status==='Done').length;
+  const inProg  = tasks.filter(t => t.status==='In Progress').length;
+  const openP   = proj.filter(p => p.status!=='Done'&&p.status!=='Skipped').length;
+  const projCost= proj.filter(p=>p.status!=='Done'&&p.status!=='Skipped').reduce((s,p)=>s+(p.cost||0),0);
+  const foodAlerts = food.filter(f=>['Expired','Use Soon'].includes(foodStatus(f))&&!f.usedUp).length;
+
+  const content = `
+    <div class="mob-section">Tasks</div>
+    <div class="mob-stat-row">
+      <div class="mob-stat"><div class="mob-stat-val">${tasks.length}</div><div class="mob-stat-lbl">Total</div></div>
+      <div class="mob-stat"><div class="mob-stat-val red">${overdue}</div><div class="mob-stat-lbl">Overdue</div></div>
+      <div class="mob-stat"><div class="mob-stat-val green">${done}</div><div class="mob-stat-lbl">Done</div></div>
+      <div class="mob-stat"><div class="mob-stat-val amber">${inProg}</div><div class="mob-stat-lbl">In Progress</div></div>
+    </div>
+    <div class="mob-section">Projects</div>
+    <div class="mob-stat-row">
+      <div class="mob-stat"><div class="mob-stat-val">${openP}</div><div class="mob-stat-lbl">Open</div></div>
+      <div class="mob-stat"><div class="mob-stat-val" style="font-size:20px">$${projCost.toLocaleString()}</div><div class="mob-stat-lbl">Est. Cost</div></div>
+    </div>
+    <div class="mob-section">Household</div>
+    <div class="mob-stat-row">
+      <div class="mob-stat"><div class="mob-stat-val">${hh.length}</div><div class="mob-stat-lbl">Total</div></div>
+      <div class="mob-stat"><div class="mob-stat-val green">${hh.filter(t=>t.done).length}</div><div class="mob-stat-lbl">Done</div></div>
+    </div>
+    <div class="mob-section">Food</div>
+    <div class="mob-stat-row">
+      <div class="mob-stat"><div class="mob-stat-val">${food.filter(f=>!f.usedUp).length}</div><div class="mob-stat-lbl">In Stock</div></div>
+      <div class="mob-stat"><div class="mob-stat-val red">${foodAlerts}</div><div class="mob-stat-lbl">Alerts</div></div>
+    </div>
+  `;
+  mobReplacePage('page-statistics', content);
+}
+
+
+// ── MOBILE GARDEN ────────────────────────────────────────────
+function renderMobGarden() {
+  const seasonal = [
+    ['Winter','Planning + seed ordering','Order early, written bed plan before spring rush.'],
+    ['Late winter','Indoor starts','Start tomatoes, peppers, brassicas, herbs indoors.'],
+    ['Early spring','Bed prep + cool crops','Compost, rake, seed peas, carrots, beets, lettuce.'],
+    ['After frost','Warm-season transplanting','Tomatoes, peppers, squash, cucumbers, beans. Last frost ~May 8.'],
+    ['Summer','Water + weed + succession','Mulch, weed, trellis, succession-sow as space opens.'],
+    ['Late summer','Harvest + preserve','Track preservation windows so produce doesn't pile up.'],
+    ['Fall','Cleanup + soil improvement','Remove spent plants, add compost, mulch garlic.'],
+  ];
+  const beds = [
+    ['Bed 1','Tomatoes','Short-season slicer','Aug-Sep'],
+    ['Bed 2','Peppers','Early bell / frying','Aug-Sep'],
+    ['Bed 3','Beans','Bush bean','Jul-Aug'],
+    ['Bed 4','Carrots / Beets','Mixed roots','Jul-Sep'],
+    ['Bed 5','Greens','Lettuce / spinach / kale','Jun-Oct'],
+    ['Bed 6','Squash / Cucumbers','Short-season varieties','Jul-Sep'],
+    ['Garlic Bed','Garlic','Hardneck','Jul'],
+    ['Herb Area','Herbs','Parsley / dill / cilantro / basil','All season'],
+  ];
+  const content = `
+    <div class="mob-section">Seasonal Plan</div>
+    ${seasonal.map(([s,f,d]) => `
+      <div class="mob-card" style="margin-bottom:8px">
+        <div class="mob-card-body">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--forest-light);margin-bottom:4px">${s}</div>
+          <div style="font-weight:600;font-size:14px;margin-bottom:3px">${f}</div>
+          <div style="font-size:12px;color:var(--muted)">${d}</div>
+        </div>
+      </div>`).join('')}
+    <div class="mob-section">Bed Plan</div>
+    ${beds.map(([bed,crop,variety,harvest]) => `
+      <div class="mob-card" style="margin-bottom:8px">
+        <div class="mob-card-body">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="flex:1">
+              <div style="font-weight:600;font-size:14px">${bed}: ${crop}</div>
+              <div style="font-size:12px;color:var(--muted)">${variety}</div>
+            </div>
+            <span class="mob-pill mob-pill-default">Harvest: ${harvest}</span>
+          </div>
+        </div>
+      </div>`).join('')}
+  `;
+  mobReplacePage('page-garden', content);
+}
+
+// ── MOBILE PLANNING ───────────────────────────────────────────
+function renderMobPlanning() {
+  const months = [
+    ['Jan','Snow access, fuel checks','Seed planning','Battery tenders, generator'],
+    ['Feb','Snow mgmt, ice watch','Order seeds','Service tools'],
+    ['Mar','Thaw + drainage','Start indoor seedlings','Prep mowers'],
+    ['Apr','Driveway, culverts','Bed prep, cool crops','Get mowers ready'],
+    ['May','Mowing begins','Transplant warm crops','Heavy mower use'],
+    ['Jun','Trim, monitor drainage','Weed, mulch, sow','Blade + oil checks'],
+    ['Jul','Mow, frontage trim','Harvest, water','Mid-season maintenance'],
+    ['Aug','Maintain access','Harvest, preserve','Plan fall servicing'],
+    ['Sep','Leaf/drainage prep','Fall crops, garlic plan','Inspect roofs/sheds'],
+    ['Oct','Winter prep, hoses','Cleanup, compost, garlic','Winterize mowers'],
+    ['Nov','Storm readiness','Close beds','Service snow equip'],
+    ['Dec','Snow + outage prep','Review notes','Indoor maintenance'],
+  ];
+  const curMonth = new Date().getMonth();
+  const content = `
+    ${months.map(([m,prop,garden,equip],i) => `
+      <div class="mob-card" style="margin-bottom:8px;${i===curMonth?'border-left:3px solid var(--forest-light)':''}">
+        <div class="mob-card-body">
+          <div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:${i===curMonth?'var(--forest-light)':'var(--forest)'};margin-bottom:8px">${m}${i===curMonth?' ← This month':''}</div>
+          <div style="display:grid;gap:4px;font-size:12px">
+            <div><span style="font-weight:600;color:var(--muted)">Property: </span>${prop}</div>
+            <div><span style="font-weight:600;color:var(--muted)">Garden: </span>${garden}</div>
+            <div><span style="font-weight:600;color:var(--muted)">Equipment: </span>${equip}</div>
+          </div>
+        </div>
+      </div>`).join('')}
+  `;
+  mobReplacePage('page-planning', content);
+}
+
+// ── MOBILE NOTES ──────────────────────────────────────────────
+function renderMobNotes() {
+  const phases = [
+    ['Map + Prioritize','Late winter / early spring','Mark buckthorn patches. Flag worst fruiting shrubs first.'],
+    ['Pull seedlings','Spring after rain','Hand-pull first-year plants while soil is moist. Bag fruiting material.'],
+    ['Cut larger stems','Late spring – fall','Cut larger stems, remove seeders first. Focus on fruiting shrubs.'],
+    ['Replant cover','Spring or early fall','Plant wild strawberry in openings. Living ground cover in disturbed gaps.'],
+    ['Water establishment','First growing season','Water during dry stretches, especially right after planting.'],
+    ['Follow-up patrols','Monthly for 2 seasons','Scout and pull new seedlings. Seed persists 1-2 years.'],
+    ['Compare photos','Spring + fall','Rephotograph fixed points to track progress.'],
+    ['Expand zone','Year 2+','Repeat only after pilot area holds. Do not clear more than you can monitor.'],
+  ];
+  const research = [
+    ['Zone 4a/4b','True cold tolerance needed for planting and winter prep.'],
+    ['Last frost ~May 8','Only ~146 growing days — order and plan early.'],
+    ['Storm risk','Thunderstorms, wind, hail, tornadoes, outages — routine risks.'],
+    ['Culverts / drainage','Drainage walks are core annual maintenance.'],
+    ['Oak wilt','Do NOT prune oaks April–July. Safe: Nov–Mar.'],
+    ['5-ft frost depth','Exterior water lines and winterization are a priority.'],
+    ['Radon','Under-addressed locally — test every 2 years.'],
+    ['Noxious weeds','County issues annual notice — weed scouting must be tracked.'],
+  ];
+  const content = `
+    <div class="mob-section">Buckthorn Restoration — 8 Phase Plan</div>
+    ${phases.map(([phase,timing,detail],i) => `
+      <div class="mob-card" style="margin-bottom:8px">
+        <div class="mob-card-body" style="display:flex;gap:12px;align-items:flex-start">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--forest);color:var(--cream);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">${i+1}</div>
+          <div>
+            <div style="font-weight:600;font-size:14px">${phase}</div>
+            <div style="font-size:11px;color:var(--forest-light);margin-bottom:3px">${timing}</div>
+            <div style="font-size:12px;color:var(--muted)">${detail}</div>
+          </div>
+        </div>
+      </div>`).join('')}
+    <div class="mob-section">Local Research — Foley / Benton County</div>
+    ${research.map(([topic,note]) => `
+      <div class="mob-card" style="margin-bottom:8px">
+        <div class="mob-card-body">
+          <div style="font-weight:600;font-size:13px;margin-bottom:3px">${topic}</div>
+          <div style="font-size:12px;color:var(--muted)">${note}</div>
+        </div>
+      </div>`).join('')}
+  `;
+  mobReplacePage('page-notes', content);
+}
+
+// ── Wire mobNavFull to use mobile renders ─────────────────────
+function mobNavFull(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pageEl = document.getElementById('page-' + page);
+  if (pageEl) pageEl.classList.add('active');
+  document.querySelectorAll('.mob-tab').forEach(t => t.classList.remove('active'));
+  window.scrollTo(0, 0);
+  // Use mobile renders where available
+  const mobRenders = {
+    household:  renderMobHousehold,
+    projects:   renderMobProjects,
+    mowers:     renderMobMowers,
+    statistics: renderMobStatistics,
+    garden:     renderMobGarden,
+    planning:   renderMobPlanning,
+    notes:      renderMobNotes,
+    dashboard:  renderMobDashboard,
+    duesoon:    renderMobDueSoon,
+    tasks:      renderMobTasks,
+    food:       renderMobFood,
+  };
+  if (mobRenders[page]) { mobRenders[page](); return; }
+  renders[page] && renders[page]();
+}
+
+// ── Also patch mobNav to use mobile renders for all pages ─────
+const _mobRenderMap = {
+  household:  () => renderMobHousehold(),
+  projects:   () => renderMobProjects(),
+  mowers:     () => renderMobMowers(),
+  statistics: () => renderMobStatistics(),
+};
 
 // ── Mobile init — wire tab bar with addEventListener ─────────
 function mobInit() {
