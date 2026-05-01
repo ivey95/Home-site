@@ -12,6 +12,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title>Foley Property — Ivan & Michaela</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <style>
@@ -1310,6 +1311,35 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
   .settings-grid { grid-template-columns: 1fr !important; }
 }
 
+
+/* ── Sync indicator ──────────────────────────────────────────── */
+#sync-indicator {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 3px; z-index: 9999; pointer-events: none;
+  transition: opacity 0.3s;
+}
+#sync-indicator.syncing {
+  background: linear-gradient(90deg, var(--forest), var(--forest-light), var(--sage), var(--forest-light), var(--forest));
+  background-size: 300% 100%;
+  animation: syncSlide 1.5s linear infinite;
+}
+#sync-indicator.error { background: var(--red); opacity: 1 !important; }
+@keyframes syncSlide { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
+
+/* ── Offline banner ──────────────────────────────────────────── */
+#offline-banner {
+  display: none; position: fixed;
+  bottom: 70px; left: 50%; transform: translateX(-50%);
+  background: var(--amber); color: var(--ink);
+  padding: 8px 20px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; z-index: 500;
+  box-shadow: var(--shadow);
+}
+#offline-banner.show { display: block; }
+@media (max-width: 768px) {
+  #offline-banner { bottom: 80px; }
+}
+
 </style>
 </head>
 <body>
@@ -2559,7 +2589,14 @@ function mobToggleFoodRestock(id) {
 
 
 // ============================================================
-// DATA LAYER
+// SUPABASE CONFIG
+// ============================================================
+const _SB_URL = 'https://tporawvlbkhcgadyaleo.supabase.co';
+const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwb3Jhd3ZsYmtoY2dhZHlhbGVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1Nzk1NTUsImV4cCI6MjA5MzE1NTU1NX0.YPQdX6Es_qfTzmBJ4RrmA151fOFSnDoGySAvGQsMt5o';
+const _sb = supabase.createClient(_SB_URL, _SB_KEY);
+
+// ============================================================
+// DATA LAYER — localStorage + Supabase sync
 // ============================================================
 const KEYS = {
   tasks:        'foley_tasks',
@@ -2573,13 +2610,209 @@ const KEYS = {
   customText:   'foley_custom_text',
 };
 
+// localStorage key → Supabase table name
+const _TABLE = {
+  foley_tasks:     'tasks',
+  foley_household: 'household',
+  foley_projects:  'projects',
+  foley_food:      'food',
+  foley_mowers:    'mowers',
+  foley_events:    'events',
+};
+
+// JS camelCase → Supabase snake_case column mapping
+const _COL = {
+  lastDone:   'last_done',
+  usedUp:     'used_up',
+  startTime:  'start_time',
+  endTime:    'end_time',
+  allDay:     'all_day',
+  repeatEnd:  'repeat_end',
+  targetDate: 'target_date',
+  timeEst:    'time_est',
+};
+
+function _toSnake(obj) {
+  const r = {};
+  Object.entries(obj).forEach(([k,v]) => { r[_COL[k] || k] = v; });
+  return r;
+}
+function _fromSnake(obj) {
+  const rev = {};
+  Object.entries(_COL).forEach(([js,sql]) => { rev[sql] = js; });
+  const r = {};
+  Object.entries(obj).forEach(([k,v]) => { r[rev[k] || k] = v; });
+  return r;
+}
+
+let _isOnline = navigator.onLine;
+let _offlineQueue = [];
+let _realtimeSubs = [];
+let _syncDebounce = null;
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+// ── Local cache ───────────────────────────────────────────────
 function load(key) {
   try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; }
 }
+
+// ── Save: write local immediately, sync to Supabase ──────────
 function save(key, data) {
   localStorage.setItem(key, JSON.stringify(data));
+  const table = _TABLE[key];
+  if (!table) return;
+  if (!_isOnline) { _offlineQueue.push({key, data, t: Date.now()}); _saveQueue(); return; }
+  clearTimeout(_syncDebounce);
+  _syncDebounce = setTimeout(() => _pushToSupabase(table, data), 300);
 }
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+async function _pushToSupabase(table, data) {
+  _setSyncing(true);
+  try {
+    const rows = data.map(item => _toSnake(item));
+    // Upsert all rows, then delete any that no longer exist
+    if (rows.length > 0) {
+      const {error} = await _sb.from(table).upsert(rows, {onConflict: 'id'});
+      if (error) throw error;
+    }
+    // Delete rows not in current data
+    const ids = data.map(r => r.id);
+    if (ids.length > 0) {
+      await _sb.from(table).delete().not('id', 'in', `(${ids.map(id=>`"${id}"`).join(',')})`);
+    } else {
+      await _sb.from(table).delete().neq('id', 'never-matches-placeholder');
+    }
+    _setSyncing(false);
+  } catch(e) {
+    console.error('Supabase push error:', e);
+    _setSyncing(false, true);
+    toast('Sync error — saved locally', 'warn', 3000);
+  }
+}
+
+// ── Pull all data from Supabase on load ───────────────────────
+async function _pullFromSupabase() {
+  _setSyncing(true);
+  try {
+    const tables = Object.entries(_TABLE);
+    await Promise.all(tables.map(async ([key, table]) => {
+      const {data, error} = await _sb.from(table).select('*');
+      if (error) throw error;
+      if (data && data.length > 0) {
+        const mapped = data.map(_fromSnake);
+        localStorage.setItem(key, JSON.stringify(mapped));
+      }
+    }));
+    _setSyncing(false);
+    return true;
+  } catch(e) {
+    console.error('Supabase pull error:', e);
+    _setSyncing(false, true);
+    return false;
+  }
+}
+
+// ── Real-time subscriptions ───────────────────────────────────
+function _subscribeRealtime() {
+  // Remove existing subs
+  _realtimeSubs.forEach(s => _sb.removeChannel(s));
+  _realtimeSubs = [];
+
+  Object.entries(_TABLE).forEach(([key, table]) => {
+    const ch = _sb.channel('rt_' + table)
+      .on('postgres_changes', {event: '*', schema: 'public', table}, payload => {
+        _handleRemoteChange(key, payload);
+      })
+      .subscribe();
+    _realtimeSubs.push(ch);
+  });
+}
+
+function _handleRemoteChange(key, payload) {
+  const local = load(key);
+  if (payload.eventType === 'DELETE') {
+    const filtered = local.filter(r => r.id !== payload.old.id);
+    localStorage.setItem(key, JSON.stringify(filtered));
+  } else if (payload.new) {
+    const incoming = _fromSnake(payload.new);
+    const idx = local.findIndex(r => r.id === incoming.id);
+    if (idx >= 0) local[idx] = incoming; else local.push(incoming);
+    localStorage.setItem(key, JSON.stringify(local));
+  }
+  // Refresh the current page
+  _refreshCurrentPage();
+  toast('↻ Updated from another device', 'info', 2000);
+}
+
+function _refreshCurrentPage() {
+  const active = document.querySelector('.page.active');
+  if (!active) return;
+  const page = active.id.replace('page-', '');
+  if (IS_MOBILE()) {
+    const mobRenders = {
+      dashboard: renderMobDashboard, duesoon: renderMobDueSoon,
+      tasks: renderMobTasks, food: renderMobFood,
+      household: renderMobHousehold, projects: renderMobProjects,
+      mowers: renderMobMowers, statistics: renderMobStatistics,
+      more: renderMobMore,
+    };
+    if (mobRenders[page]) { mobRenders[page](); return; }
+  }
+  if (renders[page]) renders[page]();
+}
+
+// ── Offline queue ─────────────────────────────────────────────
+function _saveQueue() {
+  try { localStorage.setItem('_foley_queue', JSON.stringify(_offlineQueue)); } catch {}
+}
+async function _flushQueue() {
+  const q = JSON.parse(localStorage.getItem('_foley_queue') || '[]');
+  if (!q.length) return;
+  for (const item of q) {
+    await _pushToSupabase(_TABLE[item.key], item.data);
+  }
+  localStorage.removeItem('_foley_queue');
+  _offlineQueue = [];
+  toast('↑ Offline changes synced', 'success');
+}
+
+// ── Online/offline ────────────────────────────────────────────
+window.addEventListener('online', () => {
+  _isOnline = true;
+  document.getElementById('offline-banner')?.classList.remove('show');
+  _flushQueue().then(() => _pullFromSupabase().then(_refreshCurrentPage));
+});
+window.addEventListener('offline', () => {
+  _isOnline = false;
+  document.getElementById('offline-banner')?.classList.add('show');
+});
+
+// ── Sync bar ──────────────────────────────────────────────────
+let _syncTimer = null;
+function _setSyncing(on, error=false) {
+  const bar = document.getElementById('sync-indicator');
+  if (!bar) return;
+  if (error) { bar.className = 'error'; setTimeout(() => bar.className = '', 3000); return; }
+  bar.className = on ? 'syncing' : '';
+}
+
+// ── Init Supabase ─────────────────────────────────────────────
+async function initSupabase() {
+  // Load saved offline queue
+  try { _offlineQueue = JSON.parse(localStorage.getItem('_foley_queue') || '[]'); } catch {}
+
+  // Pull fresh data from Supabase (overrides local if Supabase has data)
+  const pulled = await _pullFromSupabase();
+
+  // Subscribe to real-time changes
+  _subscribeRealtime();
+
+  if (!navigator.onLine) {
+    document.getElementById('offline-banner')?.classList.add('show');
+  }
+  return pulled;
+}
 
 // ============================================================
 // DEFAULT DATA
@@ -5191,8 +5424,19 @@ function resetMobTabs() {
   toast('Tab bar reset', 'success');
 }
 
-seedData();
-applyAllCustomizations();
+// Init Supabase then start app
+async function startApp() {
+  seedData();
+  applyAllCustomizations();
+  // Try to pull from Supabase first (get latest data before rendering)
+  await initSupabase();
+  initUI();
+  const _pwaPage = new URLSearchParams(location.search).get('page');
+  if (_pwaPage && document.getElementById('page-' + _pwaPage)) {
+    IS_MOBILE() ? mobNav(_pwaPage) : nav(_pwaPage);
+  }
+}
+startApp();
 
 // Choose correct UI based on screen size
 function initUI() {
@@ -5219,9 +5463,7 @@ window.addEventListener('resize', () => {
   }, 200);
 });
 
-initUI();
-const _pwaPage = new URLSearchParams(location.search).get('page');
-if (_pwaPage && document.getElementById('page-' + _pwaPage)) nav(_pwaPage);
+// started via startApp() above
 
 // ── PWA: Service Worker + Install Prompt ─────────────────────
 if ('serviceWorker' in navigator) {
@@ -5383,6 +5625,8 @@ window.addEventListener('appinstalled', () => {
 
 
 <!-- ── Toast container ── -->
+<div id="sync-indicator"></div>
+<div id="offline-banner">⚡ Offline — changes will sync when reconnected</div>
 <div id="toast-container"></div>
 
 <!-- ── Back to top ── -->
