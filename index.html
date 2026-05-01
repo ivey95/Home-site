@@ -717,7 +717,7 @@ button:focus:not(:focus-visible) { outline: none; }
   #sidebar.open { transform: translateX(0); }
 
   /* Hide the collapse button on mobile */
-  #sidebar-collapse-btn { display: none; }
+  #sidebar-collapse-btn { display: none !important; }
 
   /* Page padding */
   .page { padding: 16px !important; }
@@ -1180,6 +1180,7 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
     display: flex !important;
     flex-direction: column !important;
     position: relative !important;
+    overflow-x: hidden !important;
   }
 
   /* Drag handle pill at top */
@@ -1203,6 +1204,7 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
   .modal-inner {
     padding: 0 20px 12px !important;
     overflow-y: auto !important;
+    overflow-x: hidden !important;
     flex: 1 !important;
     -webkit-overflow-scrolling: touch;
   }
@@ -1212,6 +1214,8 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
     flex-direction: column !important;
     gap: 12px !important;
     margin-bottom: 12px !important;
+    width: 100% !important;
+    overflow: hidden !important;
   }
 
   /* Exception: short rows that make sense side by side */
@@ -1362,7 +1366,7 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
 </div>
 
 <!-- MOBILE "MORE" PAGE -->
-<div class="page" id="page-more" style="display:none">
+<div class="page" id="page-more">
   <div style="padding:8px 0 16px">
     <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--forest);margin-bottom:4px">Foley Property</div>
     <div style="font-size:12px;color:var(--muted);font-style:italic">Ivan & Michaela · 6 acres</div>
@@ -2076,8 +2080,8 @@ function mobNav(page) {
 
   window.scrollTo(0, 0);
 
-  // Render
-  if (page === 'more') { renderMobMore(); return; }
+  // Render — page must be visible before render functions run
+  if (page === 'more')      { renderMobMore(); return; }
   if (page === 'dashboard') { renderMobDashboard(); return; }
   if (page === 'duesoon')   { renderMobDueSoon(); return; }
   if (page === 'tasks')     { renderMobTasks(); return; }
@@ -2100,7 +2104,7 @@ const MOB_MORE_PAGES = [
 
 function renderMobMore() {
   const el = document.getElementById('mob-more-list');
-  if (!el) return;
+  if (!el) { console.warn('mob-more-list not found'); return; }
   el.innerHTML = MOB_MORE_PAGES.map(p => `
     <div onclick="mobNavFull('${p.page}')" style="
       display:flex; align-items:center; gap:16px;
@@ -4309,6 +4313,11 @@ const _origSaveTask = typeof saveTask !== 'undefined' ? saveTask : null;
 // We'll wrap at call site below via monkey-patch
 
 // ── Mobile sidebar ───────────────────────────────────────────
+function resetSidebarToggleBtn() {
+  const btn = document.querySelector('#sidebar-toggle .toggle-btn');
+  if (btn) btn.textContent = '☰';
+}
+
 function toggleMobileSidebar() {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebar-overlay');
@@ -4316,6 +4325,7 @@ function toggleMobileSidebar() {
   const isOpen = sidebar.classList.toggle('open');
   overlay.classList.toggle('open', isOpen);
   if (btn) btn.textContent = isOpen ? '✕' : '☰';
+  if (!isOpen) resetSidebarToggleBtn();
 }
 
 // ── Sidebar collapse ─────────────────────────────────────────
@@ -4788,7 +4798,7 @@ window.addEventListener('appinstalled', () => {
     // Swipe left more than 60px and mostly horizontal
     if (dx < -60 && dy < 60) {
       const sidebar = document.getElementById('sidebar');
-      if (sidebar?.classList.contains('open')) toggleMobileSidebar();
+      if (sidebar?.classList.contains('open')) { sidebar.classList.remove('open'); document.getElementById('sidebar-overlay')?.classList.remove('open'); resetSidebarToggleBtn(); }
     }
     // Swipe right from left edge to open
     if (dx > 60 && dy < 60 && touchStartX < 30) {
@@ -4903,7 +4913,7 @@ window.addEventListener('appinstalled', () => {
   <span class="toggle-title">Foley Property</span>
   <button class="toggle-btn" onclick="toggleMobileSidebar()" aria-label="Menu">☰</button>
 </div>
-<div id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+<div id="sidebar-overlay" onclick="document.getElementById('sidebar').classList.remove('open');this.classList.remove('open');resetSidebarToggleBtn()"></div>
 
 <!-- ── Sidebar collapse button ── -->
 <button id="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" data-tip="Collapse sidebar">‹</button>
