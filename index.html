@@ -2641,7 +2641,7 @@ let _isOnline = navigator.onLine;
 let _offlineQueue = [];
 let _realtimeSubs = [];
 let _syncDebounce = null;
-let _suppressRealtime = false;  // true while we're writing our own changes
+const _localWriteIds = new Set();  // IDs we just wrote — ignore their realtime events
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
@@ -2662,7 +2662,8 @@ function save(key, data) {
 
 async function _pushToSupabase(table, data) {
   _setSyncing(true);
-  _suppressRealtime = true;
+  // Track IDs we're writing so realtime ignores them
+  data.forEach(r => { if (r.id) _localWriteIds.add(r.id); });
   try {
     const rows = data.map(item => _toSnake(item));
     if (rows.length > 0) {
@@ -2675,13 +2676,13 @@ async function _pushToSupabase(table, data) {
     _setSyncing(false, true);
     toast('Sync error — saved locally', 'warn', 3000);
   } finally {
-    // Re-enable after a short delay to let realtime events settle
-    setTimeout(() => { _suppressRealtime = false; }, 1500);
+    // Clear IDs after realtime events have had time to arrive
+    setTimeout(() => { data.forEach(r => _localWriteIds.delete(r.id)); }, 3000);
   }
 }
 
 async function _pushTableToSupabase(table, items) {
-  _suppressRealtime = true;
+  items.forEach(r => { if (r.id) _localWriteIds.add(r.id); });
   try {
     const rows = items.map(item => _toSnake(item));
     if (rows.length > 0) {
@@ -2689,7 +2690,7 @@ async function _pushTableToSupabase(table, items) {
       if (error) { console.error('Push error', table, error); }
     }
   } catch(e) { console.error('Push error:', table, e); }
-  finally { setTimeout(() => { _suppressRealtime = false; }, 1500); }
+  finally { setTimeout(() => { items.forEach(r => _localWriteIds.delete(r.id)); }, 3000); }
 }
 
 async function syncNow() {
@@ -2743,7 +2744,9 @@ function _subscribeRealtime() {
 }
 
 function _handleRemoteChange(key, payload) {
-  if (_suppressRealtime) return;  // ignore our own writes
+  // Ignore events for records we just wrote ourselves
+  const changedId = payload.new?.id || payload.old?.id;
+  if (changedId && _localWriteIds.has(changedId)) return;
   const local = load(key);
   if (payload.eventType === 'DELETE') {
     const filtered = local.filter(r => r.id !== payload.old.id);
