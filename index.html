@@ -1425,7 +1425,7 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
   </div>
   <div class="stat-grid" id="dash-stats"></div>
   <div style="display:flex;gap:10px;margin-bottom:20px;align-items:center;flex-wrap:wrap">
-    <button class="btn btn-secondary btn-sm" onclick="_pullFromSupabase().then(_refreshCurrentPage)" style="padding:6px 12px;font-size:11px" data-tip="Pull latest from Supabase">↻ Sync</button>
+    <button class="btn btn-secondary btn-sm" onclick="syncNow()" style="padding:6px 12px;font-size:11px" data-tip="Pull latest from Supabase">↻ Sync</button>
     <input type="text" id="quick-task" placeholder="Quick-add a task… (press Enter)" style="flex:1;max-width:420px" onkeydown="if(event.key==='Enter')quickAddTask()">
     <button class="btn btn-primary" onclick="quickAddTask()">+ Quick Task</button>
     <button class="btn btn-secondary" onclick="nav('planner');setTimeout(openEventModal,100)" data-tip="Add calendar event">+ Event</button>
@@ -2674,17 +2674,9 @@ async function _pushToSupabase(table, data) {
   _setSyncing(true);
   try {
     const rows = data.map(item => _toSnake(item));
-    // Upsert all rows, then delete any that no longer exist
     if (rows.length > 0) {
       const {error} = await _sb.from(table).upsert(rows, {onConflict: 'id'});
       if (error) throw error;
-    }
-    // Delete rows not in current data
-    const ids = data.map(r => r.id);
-    if (ids.length > 0) {
-      await _sb.from(table).delete().not('id', 'in', `(${ids.map(id=>`"${id}"`).join(',')})`);
-    } else {
-      await _sb.from(table).delete().neq('id', 'never-matches-placeholder');
     }
     _setSyncing(false);
   } catch(e) {
@@ -2692,6 +2684,27 @@ async function _pushToSupabase(table, data) {
     _setSyncing(false, true);
     toast('Sync error — saved locally', 'warn', 3000);
   }
+}
+
+async function _pushTableToSupabase(table, items) {
+  try {
+    const rows = items.map(item => _toSnake(item));
+    if (rows.length > 0) {
+      const {error} = await _sb.from(table).upsert(rows, {onConflict: 'id'});
+      if (error) { console.error('Push error', table, error); }
+    }
+  } catch(e) { console.error('Push error:', table, e); }
+}
+
+async function syncNow() {
+  toast('Syncing…', 'info', 1500);
+  await Promise.all(Object.entries(_TABLE).map(([key, table]) => {
+    const items = load(key);
+    return items.length > 0 ? _pushTableToSupabase(table, items) : Promise.resolve();
+  }));
+  await _pullFromSupabase();
+  _refreshCurrentPage();
+  toast('Sync complete', 'success', 2000);
 }
 
 // ── Pull all data from Supabase on load ───────────────────────
@@ -4867,13 +4880,18 @@ function exportData() {
 
 function importData(file) {
   const reader = new FileReader();
-  reader.onload = e => {
+  reader.onload = async e => {
     try {
       const data = JSON.parse(e.target.result);
       Object.entries(data).forEach(([k,v]) => { if (v) localStorage.setItem(k, JSON.stringify(v)); });
-      toast('Data imported — reloading…', 'success', 1500);
-      setTimeout(() => location.reload(), 1500);
-    } catch {
+      toast('Importing and syncing…', 'info', 2000);
+      await Promise.all(Object.entries(_TABLE).map(([key, table]) => {
+        const items = JSON.parse(localStorage.getItem(key) || '[]');
+        return items.length > 0 ? _pushTableToSupabase(table, items) : Promise.resolve();
+      }));
+      toast('Import complete!', 'success', 2000);
+      setTimeout(() => location.reload(), 2200);
+    } catch(err) {
       toast('Import failed — invalid file', 'error');
     }
   };
