@@ -2757,12 +2757,11 @@ function _handleRemoteChange(key, payload) {
     if (idx >= 0) local[idx] = incoming; else local.push(incoming);
     localStorage.setItem(key, JSON.stringify(local));
   }
-  // Refresh the current page (debounced to batch multiple row updates)
+  // Debounce refresh to batch multiple row updates into one render
   clearTimeout(_realtimeRefreshTimer);
   _realtimeRefreshTimer = setTimeout(() => {
     _refreshCurrentPage();
-    toast('↻ Synced from another device', 'info', 2000);
-  }, 500);
+  }, 600);
 }
 let _realtimeRefreshTimer = null;
 
@@ -3812,10 +3811,16 @@ function renderFood() {
   if (!fcEl) return;
 
   const filtered = _foodFilter ? food.filter(f => f.type === _foodFilter) : food;
-  const statusClass = {'In Stock':'badge-done','Use Soon':'badge-medium','Expired':'badge-overdue','Low':'badge-medium','Used Up':''};
   const typeFilters = ['','Cold','Frozen','Dry','Emergency Storage'];
-
   const alerts = food.filter(f => !f.usedUp && ['Expired','Use Soon','Low'].includes(foodStatus(f)));
+
+  const statusColor = {
+    'In Stock':  { bg:'#e8f5e8', color:'var(--forest-light)' },
+    'Use Soon':  { bg:'#fef3cd', color:'#8a6400' },
+    'Expired':   { bg:'#fde8e8', color:'var(--red)' },
+    'Low':       { bg:'#fff3e0', color:'#e65100' },
+    'Used Up':   { bg:'var(--cream-dark)', color:'var(--muted)' },
+  };
 
   fcEl.innerHTML = `
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center">
@@ -3827,57 +3832,70 @@ function renderFood() {
       <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="openFoodModal()">+ Add Item</button>
     </div>
     ${alerts.length ? `
-      <div class="alert alert-warn" style="margin-bottom:16px;cursor:pointer" onclick="document.getElementById('food-alerts-detail').style.display=document.getElementById('food-alerts-detail').style.display==='none'?'block':'none'">
+      <div class="alert alert-warn" style="margin-bottom:16px">
         <span>⚠</span>
         <strong>${alerts.length} item${alerts.length>1?'s':''} need attention</strong>
         — ${alerts.map(f=>f.name).join(', ')}
       </div>
     ` : ''}
-    <div style="columns:2;column-gap:16px">
-      ${['Cold','Frozen','Dry','Emergency Storage'].map(type => {
-        const items = filtered.filter(f => f.type === type);
-        if (!items.length) return '';
-        const label = type==='Cold'?'Cold / Refrigerated':type==='Dry'?'Dry / Pantry':type==='Emergency Storage'?'Emergency / Bulk':type;
-        const cls = type==='Cold'?'food-cold':type==='Frozen'?'food-frozen':type==='Dry'?'food-dry':'food-emergency';
-        return `<div style="break-inside:avoid;margin-bottom:20px">
-          <div class="food-section-header ${cls}" style="margin-bottom:8px">${label} (${items.length})</div>
+    ${['Cold','Frozen','Dry','Emergency Storage'].map(type => {
+      const items = filtered.filter(f => f.type === type);
+      if (!items.length) return '';
+      const label = type==='Cold'?'Cold / Refrigerated':type==='Dry'?'Dry / Pantry':type==='Emergency Storage'?'Emergency / Bulk':type;
+      const cls = type==='Cold'?'food-cold':type==='Frozen'?'food-frozen':type==='Dry'?'food-dry':'food-emergency';
+      return `
+        <div class="food-section-header ${cls}" style="margin-bottom:10px">${label} (${items.length})</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:20px">
           ${items.map(f => {
             const st = foodStatus(f);
-            const stCls = statusClass[st] || '';
-            return `<div class="card" style="margin-bottom:8px;${f.usedUp?'opacity:0.5':''}">
+            const sc = statusColor[st] || statusColor['In Stock'];
+            return `<div class="card" style="${f.usedUp?'opacity:0.55':''}">
               <div class="card-body" style="padding:12px 14px">
-                <div style="display:flex;align-items:flex-start;gap:10px">
-                  <input type="checkbox" ${f.usedUp?'checked':''} style="accent-color:var(--forest);width:16px;height:16px;margin-top:2px;flex-shrink:0;cursor:pointer" title="Mark used up" onchange="toggleFood('${f.id}',this.checked)">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">
                   <div style="flex:1;min-width:0">
-                    <div style="font-weight:600;font-size:13px;${f.usedUp?'text-decoration:line-through;color:var(--muted)':''}">${f.name}
-                      ${f.restock?'<span class="badge badge-medium" style="font-size:9px;margin-left:4px">Restock</span>':''}
+                    <div style="font-weight:600;font-size:14px;${f.usedUp?'text-decoration:line-through;color:var(--muted)':''}">
+                      ${f.name}
                     </div>
-                    <div style="font-size:11px;color:var(--muted);margin-top:2px">
-                      ${f.location||''}${f.location&&f.qty?' · ':''}${f.qty?f.qty+' '+f.unit:''}${f.useby?' · Use by: '+fmtDate(f.useby):''}
+                    <div style="font-size:12px;color:var(--muted);margin-top:3px">
+                      ${[f.location, f.qty?(f.qty+' '+f.unit):'', f.useby?'Use by '+fmtDate(f.useby):''].filter(Boolean).join(' · ')}
                     </div>
-                    ${f.notes?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${f.notes}</div>`:''}
+                    ${f.notes?`<div style="font-size:11px;color:var(--muted);margin-top:3px;font-style:italic">${f.notes}</div>`:''}
                   </div>
-                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
-                    <span class="badge ${stCls}" style="white-space:nowrap">${st}</span>
-                    <div style="display:flex;gap:4px">
-                      <button class="btn btn-secondary btn-sm" onclick="openFoodModal('${f.id}')">Edit</button>
-                      <button class="btn btn-danger btn-sm" onclick="deleteFood('${f.id}')">Del</button>
-                    </div>
-                  </div>
+                  <span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;background:${sc.bg};color:${sc.color};flex-shrink:0">${st}</span>
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--cream-dark);padding-top:8px">
+                  <button class="btn btn-sm" style="background:${f.usedUp?'var(--cream-dark)':'var(--forest)'};color:${f.usedUp?'var(--ink)':'var(--cream)'};border:none;font-size:11px;padding:4px 10px"
+                    onclick="toggleFood('${f.id}',${!f.usedUp})">
+                    ${f.usedUp?'↩ Restore':'✓ Used Up'}
+                  </button>
+                  <button class="btn btn-sm" style="background:${f.restock?'#fff3e0':'var(--cream-dark)'};color:${f.restock?'#e65100':'var(--ink)'};border:1px solid ${f.restock?'#e65100':'var(--border)'};font-size:11px;padding:4px 10px"
+                    onclick="toggleFoodRestock('${f.id}')">
+                    ${f.restock?'✓ Restock':'Flag Restock'}
+                  </button>
+                  <button class="btn btn-secondary btn-sm" style="font-size:11px;padding:4px 10px" onclick="openFoodModal('${f.id}')">Edit</button>
+                  <button class="btn btn-danger btn-sm" style="font-size:11px;padding:4px 10px;margin-left:auto" onclick="deleteFood('${f.id}')">Delete</button>
                 </div>
               </div>
             </div>`;
           }).join('')}
         </div>`;
-      }).join('')}
-    </div>
+    }).join('')}
   `;
+}
+
+function toggleFoodRestock(id) {
+  const food = load(KEYS.food);
+  const i = food.findIndex(f => f.id === id);
+  if (i < 0) return;
+  food[i].restock = !food[i].restock;
+  save(KEYS.food, food);
+  if (IS_MOBILE()) renderMobFood(); else renderFood();
 }
 
 function toggleFood(id, val) {
   const food = load(KEYS.food);
   const f = food.find(x=>x.id===id);
-  if (f) { f.usedUp = val; save(KEYS.food, food); renderFood(); }
+  if (f) { f.usedUp = val; save(KEYS.food, food); if (IS_MOBILE()) renderMobFood(); else renderFood(); }
 }
 
 function openFoodModal(id) {
