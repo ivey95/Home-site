@@ -895,6 +895,270 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
 }
 #sidebar-collapse-btn:hover { background: var(--forest-light); }
 
+
+/* ══════════════════════════════════════════════════════
+   MOBILE UI — only active on screens ≤ 768px
+   ══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* ── Bottom tab bar ─────────────────────────────────── */
+  #mob-tabs {
+    display: flex;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: 62px; z-index: 300;
+    background: var(--forest);
+    border-top: 1px solid var(--forest-mid);
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.2);
+  }
+  .mob-tab {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 3px; cursor: pointer;
+    color: var(--sage); font-size: 10px; font-weight: 600;
+    letter-spacing: 0.03em; padding: 6px 2px;
+    border: none; background: none;
+    transition: color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mob-tab .tab-icon { font-size: 20px; line-height: 1; }
+  .mob-tab.active { color: var(--cream); }
+  .mob-tab.active .tab-icon { transform: translateY(-2px); }
+
+  /* ── Push content above tab bar ─────────────────────── */
+  #main { padding-bottom: 74px !important; }
+
+  /* ── Mobile cards ────────────────────────────────────── */
+  .mob-card {
+    background: var(--white);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mob-card-body {
+    padding: 14px 16px;
+  }
+  .mob-card-title {
+    font-size: 15px; font-weight: 600;
+    color: var(--ink); margin-bottom: 6px;
+    line-height: 1.3;
+  }
+  .mob-card-meta {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    align-items: center;
+  }
+  .mob-pill {
+    font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 20px;
+    white-space: nowrap;
+  }
+  .mob-pill-high    { background: #fde8e8; color: var(--red); }
+  .mob-pill-medium  { background: #fef3cd; color: #8a6400; }
+  .mob-pill-low     { background: #e8f5e8; color: var(--forest-light); }
+  .mob-pill-ivan    { background: #dbeafe; color: #1e40af; }
+  .mob-pill-michaela{ background: #fce7f3; color: #9d174d; }
+  .mob-pill-both    { background: #e8f5e8; color: var(--forest); }
+  .mob-pill-done    { background: #e8f5e8; color: var(--forest-light); }
+  .mob-pill-overdue { background: #fde8e8; color: var(--red); }
+  .mob-pill-soon    { background: #fef3cd; color: #8a6400; }
+  .mob-pill-default { background: var(--cream-dark); color: var(--muted); }
+
+  .mob-due {
+    font-size: 12px; font-weight: 600; margin-left: auto;
+  }
+  .mob-due.overdue { color: var(--red); }
+  .mob-due.soon    { color: var(--amber); }
+  .mob-due.ok      { color: var(--muted); }
+
+  /* ── Check rows (household) ──────────────────────────── */
+  .mob-check-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px;
+    background: var(--white); border-radius: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mob-check-box {
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 2px solid var(--border); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s;
+    font-size: 14px;
+  }
+  .mob-check-box.checked {
+    background: var(--forest-light); border-color: var(--forest-light);
+    color: white;
+  }
+  .mob-check-info { flex: 1; min-width: 0; }
+  .mob-check-title {
+    font-size: 14px; font-weight: 600; color: var(--ink);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mob-check-title.done { text-decoration: line-through; color: var(--muted); }
+  .mob-check-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ── Stat row ────────────────────────────────────────── */
+  .mob-stat-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 16px;
+  }
+  .mob-stat {
+    background: var(--white); border-radius: 12px;
+    padding: 14px; text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .mob-stat-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px; font-weight: 700; color: var(--forest);
+    line-height: 1;
+  }
+  .mob-stat-val.red { color: var(--red); }
+  .mob-stat-val.amber { color: var(--amber); }
+  .mob-stat-val.green { color: var(--forest-light); }
+  .mob-stat-lbl { font-size: 10px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* ── Section heading ─────────────────────────────────── */
+  .mob-section {
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); margin: 20px 0 10px;
+  }
+  .mob-section:first-child { margin-top: 0; }
+
+  /* ── Action row at bottom of card ───────────────────── */
+  .mob-card-actions {
+    display: flex; gap: 0;
+    border-top: 1px solid var(--cream-dark);
+  }
+  .mob-card-action {
+    flex: 1; padding: 12px;
+    text-align: center; font-size: 12px; font-weight: 600;
+    color: var(--forest); background: none; border: none;
+    cursor: pointer; font-family: inherit;
+    border-right: 1px solid var(--cream-dark);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mob-card-action:last-child { border-right: none; }
+  .mob-card-action.danger { color: var(--red); }
+  .mob-card-action:active { background: var(--cream); }
+
+  /* ── Filter chips row ────────────────────────────────── */
+  .mob-filters {
+    display: flex; gap: 8px;
+    overflow-x: auto; padding-bottom: 4px;
+    margin-bottom: 14px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .mob-filters::-webkit-scrollbar { display: none; }
+  .mob-filter-chip {
+    flex-shrink: 0;
+    padding: 6px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 600;
+    background: var(--cream-dark); color: var(--muted);
+    border: none; cursor: pointer; font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s;
+  }
+  .mob-filter-chip.active {
+    background: var(--forest); color: var(--cream);
+  }
+
+  /* ── Search bar ──────────────────────────────────────── */
+  .mob-search {
+    display: flex; align-items: center;
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 14px;
+    margin-bottom: 14px; gap: 10px;
+  }
+  .mob-search input {
+    flex: 1; border: none; background: none;
+    font-size: 15px; color: var(--ink);
+    font-family: inherit;
+  }
+  .mob-search input:focus { outline: none; }
+  .mob-search-icon { color: var(--muted); font-size: 16px; }
+
+  /* ── Quick add bar ───────────────────────────────────── */
+  .mob-quick-add {
+    display: flex; gap: 8px; margin-bottom: 16px;
+  }
+  .mob-quick-add input {
+    flex: 1; border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+    font-size: 15px; font-family: inherit; color: var(--ink);
+    background: var(--white);
+  }
+  .mob-quick-add button {
+    background: var(--forest); color: var(--cream);
+    border: none; border-radius: 10px;
+    padding: 12px 16px; font-size: 14px; font-weight: 600;
+    font-family: inherit; cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* ── Hide desktop-only elements ──────────────────────── */
+  #mob-desktop { display: none !important; }
+
+  /* ── Expanded card detail ────────────────────────────── */
+  .mob-card-detail {
+    padding: 12px 16px 4px;
+    font-size: 12px; color: var(--muted);
+    border-top: 1px solid var(--cream-dark);
+    display: none;
+  }
+  .mob-card-detail.open { display: block; }
+  .mob-card-detail-row {
+    display: flex; gap: 8px; margin-bottom: 8px;
+  }
+  .mob-card-detail-label {
+    font-weight: 600; color: var(--ink); width: 80px; flex-shrink: 0;
+  }
+
+  /* ── Food items ──────────────────────────────────────── */
+  .mob-food-status {
+    font-size: 11px; font-weight: 700; padding: 2px 8px;
+    border-radius: 20px; margin-left: auto;
+  }
+  .mob-food-instock  { background: #e8f5e8; color: var(--forest-light); }
+  .mob-food-usesoon  { background: #fef3cd; color: #8a6400; }
+  .mob-food-expired  { background: #fde8e8; color: var(--red); }
+  .mob-food-low      { background: #fff3e0; color: #e65100; }
+  .mob-food-usedup   { background: var(--cream-dark); color: var(--muted); }
+
+  /* ── Project cards ───────────────────────────────────── */
+  .mob-proj-cost {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px; font-weight: 700; color: var(--umber);
+    margin-left: auto;
+  }
+
+  /* ── Mower cards ─────────────────────────────────────── */
+  .mob-service-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin: 10px 0;
+  }
+  .mob-service-item {
+    background: var(--cream); border-radius: 8px;
+    padding: 8px 10px; font-size: 11px;
+  }
+  .mob-service-label { color: var(--muted); margin-bottom: 2px; }
+  .mob-service-val { font-weight: 600; color: var(--ink); }
+  .mob-service-val.overdue { color: var(--red); }
+
+  /* Toast above tab bar */
+  #toast-container { bottom: 72px !important; }
+}
+
+/* Desktop — hide mobile-only elements */
+@media (min-width: 769px) {
+  #mob-tabs { display: none !important; }
+  #sidebar-toggle { display: none !important; }
+  .mob-only { display: none !important; }
+}
+
 </style>
 </head>
 <body>
@@ -933,6 +1197,40 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
 </div>
 
 <!-- MAIN CONTENT -->
+
+<!-- MOBILE BOTTOM TAB BAR -->
+<div id="mob-tabs">
+  <button class="mob-tab active" id="mobtab-dashboard" onclick="mobNav('dashboard')">
+    <span class="tab-icon">⌂</span>
+    <span>Home</span>
+  </button>
+  <button class="mob-tab" id="mobtab-duesoon" onclick="mobNav('duesoon')">
+    <span class="tab-icon">⏰</span>
+    <span>Due Soon</span>
+  </button>
+  <button class="mob-tab" id="mobtab-tasks" onclick="mobNav('tasks')">
+    <span class="tab-icon">✓</span>
+    <span>Tasks</span>
+  </button>
+  <button class="mob-tab" id="mobtab-food" onclick="mobNav('food')">
+    <span class="tab-icon">◉</span>
+    <span>Food</span>
+  </button>
+  <button class="mob-tab" id="mobtab-more" onclick="mobNav('more')">
+    <span class="tab-icon">⋯</span>
+    <span>More</span>
+  </button>
+</div>
+
+<!-- MOBILE "MORE" PAGE -->
+<div class="page" id="page-more" style="display:none">
+  <div style="padding:8px 0 16px">
+    <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--forest);margin-bottom:4px">Foley Property</div>
+    <div style="font-size:12px;color:var(--muted);font-style:italic">Ivan & Michaela · 6 acres</div>
+  </div>
+  <div id="mob-more-list"></div>
+</div>
+
 <div id="main">
 
 <!-- DASHBOARD -->
@@ -3668,7 +3966,7 @@ function quickAddTask() {
 // ============================================================
 seedData();
 applyAllCustomizations();
-renderDashboard();
+initUI();
 const _pwaPage = new URLSearchParams(location.search).get('page');
 if (_pwaPage && document.getElementById('page-' + _pwaPage)) nav(_pwaPage);
 
@@ -3736,6 +4034,455 @@ window.addEventListener('appinstalled', () => {
     }
   }, { passive: true });
 })();
+
+// ============================================================
+// MOBILE UI — card-based renders, bottom tab bar
+// ============================================================
+function IS_MOBILE() { return window.innerWidth <= 768; }
+
+// ── Mobile nav ───────────────────────────────────────────────
+let _mobCurrentPage = 'dashboard';
+
+function mobNav(page) {
+  if (!IS_MOBILE()) { nav(page); return; }
+  _mobCurrentPage = page;
+
+  // Update tab bar
+  document.querySelectorAll('.mob-tab').forEach(t => t.classList.remove('active'));
+  const activeTab = document.getElementById('mobtab-' + page);
+  if (activeTab) activeTab.classList.add('active');
+
+  // Show correct page
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pageEl = document.getElementById('page-' + page);
+  if (pageEl) { pageEl.classList.add('active'); }
+
+  // Sync desktop nav highlight
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + page);
+  if (navEl) navEl.classList.add('active');
+
+  window.scrollTo(0, 0);
+
+  // Render
+  if (page === 'more') { renderMobMore(); return; }
+  if (page === 'dashboard') { renderMobDashboard(); return; }
+  if (page === 'duesoon')   { renderMobDueSoon(); return; }
+  if (page === 'tasks')     { renderMobTasks(); return; }
+  if (page === 'food')      { renderMobFood(); return; }
+  renders[page] && renders[page]();
+}
+
+// ── More page ────────────────────────────────────────────────
+const MOB_MORE_PAGES = [
+  { page:'household',  label:'Household Work',  icon:'🏠' },
+  { page:'projects',   label:'Projects',         icon:'🔨' },
+  { page:'garden',     label:'Garden',           icon:'🌱' },
+  { page:'planning',   label:'Planning',         icon:'📋' },
+  { page:'notes',      label:'Property Notes',   icon:'📝' },
+  { page:'mowers',     label:'Mower Log',        icon:'⚙' },
+  { page:'planner',    label:'Planner',          icon:'📅' },
+  { page:'statistics', label:'Statistics',       icon:'📊' },
+  { page:'settings',   label:'Settings',         icon:'⚙️' },
+];
+
+function renderMobMore() {
+  const el = document.getElementById('mob-more-list');
+  if (!el) return;
+  el.innerHTML = MOB_MORE_PAGES.map(p => `
+    <div onclick="mobNavFull('${p.page}')" style="
+      display:flex; align-items:center; gap:16px;
+      padding:16px; background:var(--white);
+      border-radius:12px; margin-bottom:10px;
+      box-shadow:0 1px 4px rgba(0,0,0,0.08);
+      cursor:pointer; -webkit-tap-highlight-color:transparent;
+    ">
+      <span style="font-size:24px;width:32px;text-align:center">${p.icon}</span>
+      <span style="font-size:15px;font-weight:600;color:var(--ink)">${p.label}</span>
+      <span style="margin-left:auto;color:var(--muted);font-size:18px">›</span>
+    </div>
+  `).join('');
+}
+
+function mobNavFull(page) {
+  // Navigate to a full page from the More menu
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pageEl = document.getElementById('page-' + page);
+  if (pageEl) pageEl.classList.add('active');
+  document.querySelectorAll('.mob-tab').forEach(t => t.classList.remove('active'));
+  renders[page] && renders[page]();
+  window.scrollTo(0, 0);
+}
+
+// ── Helper: due label ─────────────────────────────────────────
+function mobDueLabel(task) {
+  const nd = calcNextDue(task.lastDone, task.freq);
+  if (!nd) return { text: 'No date', cls: 'ok' };
+  const d = daysDiff(nd);
+  if (d === null) return { text: 'No date', cls: 'ok' };
+  if (d < 0)  return { text: `${Math.abs(d)}d overdue`, cls: 'overdue' };
+  if (d === 0) return { text: 'Due today', cls: 'soon' };
+  if (d <= 21) return { text: `in ${d}d`, cls: 'soon' };
+  return { text: fmtDate(nd), cls: 'ok' };
+}
+
+function mobPriorityPill(p) {
+  const cls = p === 'High' ? 'high' : p === 'Medium' ? 'medium' : 'low';
+  return `<span class="mob-pill mob-pill-${cls}">${p}</span>`;
+}
+function mobWhoPill(w) {
+  const cls = w === 'Ivan' ? 'ivan' : w === 'Michaela' ? 'michaela' : 'both';
+  return `<span class="mob-pill mob-pill-${cls}">${w}</span>`;
+}
+
+// ── MOBILE DASHBOARD ─────────────────────────────────────────
+function renderMobDashboard() {
+  const tasks = load(KEYS.tasks);
+  const proj  = load(KEYS.projects);
+  const food  = load(KEYS.food);
+  const now   = new Date();
+
+  const overdue = tasks.filter(t => {
+    const nd = calcNextDue(t.lastDone, t.freq);
+    return nd && daysDiff(nd) < 0 && t.status !== 'Done' && t.status !== 'Skipped';
+  });
+  const due7 = tasks.filter(t => {
+    const nd = calcNextDue(t.lastDone, t.freq);
+    if (!nd) return false;
+    const d = daysDiff(nd);
+    return d !== null && d >= 0 && d <= 7 && t.status !== 'Done';
+  });
+  const done = tasks.filter(t => t.status === 'Done').length;
+  const openProj = proj.filter(p => p.status !== 'Done' && p.status !== 'Skipped').length;
+  const foodAlerts = food.filter(f => ['Expired','Use Soon','Low'].includes(foodStatus(f)) && !f.usedUp).length;
+
+  const hours = now.getHours();
+  const greeting = hours < 12 ? 'Good morning' : hours < 17 ? 'Good afternoon' : 'Good evening';
+
+  const el = document.getElementById('page-dashboard');
+  // Clear and rebuild for mobile
+  const pageHeader = el.querySelector('.page-header');
+  if (pageHeader) {
+    pageHeader.querySelector('h2').textContent = greeting;
+    pageHeader.querySelector('p').textContent = now.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});
+  }
+
+  // Replace dash-stats with mobile stats
+  const statsEl = document.getElementById('dash-stats');
+  if (statsEl) statsEl.innerHTML = `
+    <div class="mob-stat-row">
+      <div class="mob-stat">
+        <div class="mob-stat-val ${overdue.length > 0 ? 'red' : 'green'}">${overdue.length}</div>
+        <div class="mob-stat-lbl">Overdue</div>
+      </div>
+      <div class="mob-stat">
+        <div class="mob-stat-val ${due7.length > 0 ? 'amber' : 'green'}">${due7.length}</div>
+        <div class="mob-stat-lbl">Due This Week</div>
+      </div>
+      <div class="mob-stat">
+        <div class="mob-stat-val green">${done}</div>
+        <div class="mob-stat-lbl">Done</div>
+      </div>
+      <div class="mob-stat">
+        <div class="mob-stat-val ${foodAlerts > 0 ? 'red' : ''}">${foodAlerts}</div>
+        <div class="mob-stat-lbl">Food Alerts</div>
+      </div>
+    </div>
+  `;
+
+  // Quick add
+  const qEl = document.querySelector('#page-dashboard .mob-quick-add');
+  if (!qEl) {
+    const qa = document.createElement('div');
+    qa.className = 'mob-quick-add mob-only';
+    qa.innerHTML = `<input type="text" id="mob-quick-task" placeholder="Quick-add a task…" onkeydown="if(event.key==='Enter')mobQuickAdd()"><button onclick="mobQuickAdd()">Add</button>`;
+    statsEl?.after(qa);
+  }
+
+  // Overdue tasks
+  const tbody = document.querySelector('#dash-tasks-table tbody');
+  if (tbody) {
+    const upcoming = [...overdue, ...due7]
+      .slice(0, 8)
+      .map(t => {
+        const due = mobDueLabel(t);
+        return `<div class="mob-card" onclick="mobTaskDetail('${t.id}')">
+          <div class="mob-card-body">
+            <div class="mob-card-title">${t.name}</div>
+            <div class="mob-card-meta">
+              ${mobPriorityPill(t.priority)}
+              ${mobWhoPill(t.who)}
+              <span class="mob-due ${due.cls}">${due.text}</span>
+            </div>
+          </div>
+        </div>`;
+      }).join('') || '<div style="padding:20px;text-align:center;color:var(--muted);font-style:italic">All caught up! 🎉</div>';
+
+    // Replace table with cards
+    const tableWrap = document.querySelector('#page-dashboard .tbl-wrap') || tbody.closest('.tbl-wrap');
+    if (tableWrap) tableWrap.outerHTML = `<div id="mob-dash-tasks" class="mob-only">${upcoming}</div>`;
+  }
+}
+
+function mobQuickAdd() {
+  const input = document.getElementById('mob-quick-task');
+  const name = (input?.value || '').trim();
+  if (!name) return;
+  const tasks = load(KEYS.tasks);
+  tasks.push({ id:uid(), name, cat:'General', area:'', freq:'As Needed',
+    priority:'Medium', status:'Not Started', who:'Both',
+    lastDone:'', time:'', equipment:'', notes:'' });
+  save(KEYS.tasks, tasks);
+  input.value = '';
+  toast('Task added', 'success', 2000);
+  renderMobDashboard();
+}
+
+// ── MOBILE DUE SOON ──────────────────────────────────────────
+let _mobDueFilter = 'All';
+
+function renderMobDueSoon() {
+  const tasks = load(KEYS.tasks);
+  const el = document.getElementById('page-duesoon');
+  if (!el) return;
+
+  const dueTasks = tasks
+    .map(t => ({ ...t, _nd: calcNextDue(t.lastDone, t.freq), _days: null }))
+    .map(t => ({ ...t, _days: t._nd ? daysDiff(t._nd) : null }))
+    .filter(t => t.status !== 'Done' && t.status !== 'Skipped' && t._days !== null && t._days <= 21)
+    .sort((a,b) => (a._days||0) - (b._days||0));
+
+  const whoFilters = ['All','Ivan','Michaela','Both'];
+  const filtered = _mobDueFilter === 'All' ? dueTasks : dueTasks.filter(t => t.who === _mobDueFilter);
+
+  el.innerHTML = `
+    <div class="page-header"><h2>Due Soon</h2><p>${dueTasks.length} tasks due within 21 days</p></div>
+    <div class="mob-filters">
+      ${whoFilters.map(f => `<button class="mob-filter-chip ${_mobDueFilter===f?'active':''}" onclick="_mobDueFilter='${f}';renderMobDueSoon()">${f}</button>`).join('')}
+    </div>
+    ${filtered.length ? filtered.map(t => {
+      const due = mobDueLabel(t);
+      return `<div class="mob-card">
+        <div class="mob-card-body" onclick="this.nextElementSibling.classList.toggle('open')">
+          <div class="mob-card-title">${t.name}</div>
+          <div class="mob-card-meta">
+            ${mobPriorityPill(t.priority)}
+            ${mobWhoPill(t.who)}
+            <span class="mob-due ${due.cls}">${due.text}</span>
+          </div>
+        </div>
+        <div class="mob-card-detail">
+          <div class="mob-card-detail-row"><span class="mob-card-detail-label">Area</span><span>${t.area||'—'}</span></div>
+          <div class="mob-card-detail-row"><span class="mob-card-detail-label">Frequency</span><span>${t.freq}</span></div>
+          ${t.equipment ? `<div class="mob-card-detail-row"><span class="mob-card-detail-label">Equipment</span><span>${t.equipment}</span></div>` : ''}
+          ${t.notes ? `<div class="mob-card-detail-row"><span class="mob-card-detail-label">Notes</span><span>${t.notes}</span></div>` : ''}
+          <div style="margin:4px 0 10px;display:flex;gap:8px">
+            <button class="mob-card-action" style="flex:none;padding:8px 14px;border-radius:8px;background:var(--forest);color:var(--cream)" onclick="markTaskDone('${t.id}')">✓ Mark Done</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('') : '<div style="padding:40px;text-align:center;color:var(--muted);font-style:italic">Nothing due — great work! 🎉</div>'}
+  `;
+}
+
+function markTaskDone(id) {
+  const tasks = load(KEYS.tasks);
+  const i = tasks.findIndex(t => t.id === id);
+  if (i < 0) return;
+  tasks[i].status = 'Done';
+  tasks[i].lastDone = today();
+  save(KEYS.tasks, tasks);
+  toast('Marked done', 'success', 1500);
+  renderMobDueSoon();
+}
+
+// ── MOBILE TASKS ─────────────────────────────────────────────
+let _mobTaskSearch = '';
+let _mobTaskWho    = 'All';
+let _mobTaskStatus = 'All';
+
+function renderMobTasks() {
+  const tasks = load(KEYS.tasks);
+  const el = document.getElementById('page-tasks');
+  if (!el) return;
+
+  let filtered = tasks.filter(t =>
+    (!_mobTaskSearch || t.name.toLowerCase().includes(_mobTaskSearch.toLowerCase()) || (t.cat||'').toLowerCase().includes(_mobTaskSearch.toLowerCase())) &&
+    (_mobTaskWho === 'All' || t.who === _mobTaskWho) &&
+    (_mobTaskStatus === 'All' || t.status === _mobTaskStatus)
+  ).sort((a,b) => {
+    const da = calcNextDue(a.lastDone, a.freq); const db = calcNextDue(b.lastDone, b.freq);
+    if (!da && !db) return 0; if (!da) return 1; if (!db) return -1;
+    return da.localeCompare(db);
+  });
+
+  el.innerHTML = `
+    <div class="page-header"><h2>Master Tasks</h2><p>${filtered.length} of ${tasks.length} tasks</p></div>
+    <div class="mob-search">
+      <span class="mob-search-icon">🔍</span>
+      <input type="text" placeholder="Search tasks…" value="${_mobTaskSearch}"
+        oninput="_mobTaskSearch=this.value;renderMobTasks()">
+    </div>
+    <div class="mob-filters">
+      ${['All','Ivan','Michaela','Both'].map(f=>`<button class="mob-filter-chip ${_mobTaskWho===f?'active':''}" onclick="_mobTaskWho='${f}';renderMobTasks()">${f}</button>`).join('')}
+      <span style="width:1px;background:var(--border);flex-shrink:0;margin:0 4px"></span>
+      ${['All','Not Started','In Progress','Done'].map(f=>`<button class="mob-filter-chip ${_mobTaskStatus===f?'active':''}" onclick="_mobTaskStatus='${f}';renderMobTasks()">${f}</button>`).join('')}
+    </div>
+    ${filtered.map(t => {
+      const due = mobDueLabel(t);
+      const isDone = t.status === 'Done';
+      return `<div class="mob-card">
+        <div class="mob-card-body" onclick="this.nextElementSibling.classList.toggle('open')">
+          <div class="mob-card-title" style="${isDone?'text-decoration:line-through;opacity:0.5':''}">
+            ${t.name}
+          </div>
+          <div class="mob-card-meta">
+            ${mobPriorityPill(t.priority)}
+            ${mobWhoPill(t.who)}
+            <span class="mob-due ${due.cls}">${due.text}</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:5px">${t.cat} · ${t.freq}</div>
+        </div>
+        <div class="mob-card-detail">
+          ${t.area ? `<div class="mob-card-detail-row"><span class="mob-card-detail-label">Area</span><span>${t.area}</span></div>` : ''}
+          ${t.equipment ? `<div class="mob-card-detail-row"><span class="mob-card-detail-label">Equipment</span><span>${t.equipment}</span></div>` : ''}
+          ${t.time ? `<div class="mob-card-detail-row"><span class="mob-card-detail-label">Time</span><span>${t.time}</span></div>` : ''}
+          ${t.notes ? `<div class="mob-card-detail-row"><span class="mob-card-detail-label">Notes</span><span>${t.notes}</span></div>` : ''}
+          <div class="mob-card-detail-row"><span class="mob-card-detail-label">Last Done</span><span>${t.lastDone ? fmtDate(t.lastDone) : 'Never'}</span></div>
+        </div>
+        <div class="mob-card-actions">
+          <button class="mob-card-action" onclick="mobMarkTaskDone('${t.id}')">${isDone ? '↩ Undo' : '✓ Done'}</button>
+          <button class="mob-card-action" onclick="openTaskModal('${t.id}')">Edit</button>
+          <button class="mob-card-action danger" onclick="deleteTask('${t.id}')">Delete</button>
+        </div>
+      </div>`;
+    }).join('') || '<div style="padding:40px;text-align:center;color:var(--muted);font-style:italic">No tasks match your filters</div>'}
+    <div style="margin-top:16px">
+      <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px" onclick="openTaskModal()">+ Add Task</button>
+    </div>
+  `;
+}
+
+function mobMarkTaskDone(id) {
+  const tasks = load(KEYS.tasks);
+  const i = tasks.findIndex(t => t.id === id);
+  if (i < 0) return;
+  if (tasks[i].status === 'Done') {
+    tasks[i].status = 'Not Started';
+    tasks[i].lastDone = '';
+  } else {
+    tasks[i].status = 'Done';
+    tasks[i].lastDone = today();
+  }
+  save(KEYS.tasks, tasks);
+  toast(tasks[i].status === 'Done' ? 'Marked done' : 'Unmarked', 'success', 1500);
+  renderMobTasks();
+}
+
+function mobTaskDetail(id) {
+  mobNav('tasks');
+  _mobTaskSearch = '';
+  _mobTaskWho = 'All';
+  _mobTaskStatus = 'All';
+}
+
+// ── MOBILE FOOD ───────────────────────────────────────────────
+let _mobFoodFilter = 'All';
+
+function renderMobFood() {
+  const food = load(KEYS.food);
+  const el = document.getElementById('page-food');
+  if (!el) return;
+
+  const typeFilters = ['All','Cold','Frozen','Dry','Emergency Storage'];
+  const filtered = _mobFoodFilter === 'All' ? food : food.filter(f => f.type === _mobFoodFilter);
+
+  const statusClass = { 'In Stock':'instock','Use Soon':'usesoon','Expired':'expired','Low':'low','Used Up':'usedup' };
+
+  el.innerHTML = `
+    <div class="page-header"><h2>Food Inventory</h2><p>${food.filter(f=>!f.usedUp).length} items tracked</p></div>
+    <div style="margin-bottom:14px">
+      <button class="btn btn-primary btn-sm" onclick="openFoodModal()" style="width:100%;padding:12px;font-size:14px">+ Add Item</button>
+    </div>
+    <div class="mob-filters">
+      ${typeFilters.map(f => `<button class="mob-filter-chip ${_mobFoodFilter===f?'active':''}" onclick="_mobFoodFilter='${f}';renderMobFood()">${f === 'Emergency Storage' ? 'Emergency' : f}</button>`).join('')}
+    </div>
+    ${filtered.map(f => {
+      const st = foodStatus(f);
+      const stCls = statusClass[st] || 'instock';
+      return `<div class="mob-card" style="${f.usedUp?'opacity:0.5':''}">
+        <div class="mob-card-body" onclick="this.nextElementSibling.classList.toggle('open')">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="mob-card-title" style="flex:1;${f.usedUp?'text-decoration:line-through':''}">
+              ${f.name}
+            </div>
+            <span class="mob-food-status mob-food-${stCls}">${st}</span>
+          </div>
+          <div class="mob-card-meta" style="margin-top:6px">
+            <span class="mob-pill mob-pill-default">${f.type}</span>
+            ${f.location ? `<span style="font-size:11px;color:var(--muted)">${f.location}</span>` : ''}
+            <span style="font-size:12px;font-weight:600;margin-left:auto">${f.qty} ${f.unit}</span>
+          </div>
+        </div>
+        <div class="mob-card-detail">
+          ${f.useby ? `<div class="mob-card-detail-row"><span class="mob-card-detail-label">Use By</span><span>${f.useby}</span></div>` : ''}
+          ${f.notes ? `<div class="mob-card-detail-row"><span class="mob-card-detail-label">Notes</span><span>${f.notes}</span></div>` : ''}
+        </div>
+        <div class="mob-card-actions">
+          <button class="mob-card-action" onclick="mobToggleFoodUsedUp('${f.id}')">${f.usedUp ? '↩ Restore' : '✓ Used Up'}</button>
+          <button class="mob-card-action" onclick="mobToggleFoodRestock('${f.id}')">${f.restock ? '✓ Restock' : 'Flag Restock'}</button>
+          <button class="mob-card-action" onclick="openFoodModal('${f.id}')">Edit</button>
+          <button class="mob-card-action danger" onclick="deleteFood('${f.id}')">Del</button>
+        </div>
+      </div>`;
+    }).join('') || '<div style="padding:40px;text-align:center;color:var(--muted);font-style:italic">No items in this category</div>'}
+  `;
+}
+
+function mobToggleFoodUsedUp(id) {
+  const food = load(KEYS.food);
+  const i = food.findIndex(f => f.id === id);
+  if (i < 0) return;
+  food[i].usedUp = !food[i].usedUp;
+  save(KEYS.food, food);
+  renderMobFood();
+}
+
+function mobToggleFoodRestock(id) {
+  const food = load(KEYS.food);
+  const i = food.findIndex(f => f.id === id);
+  if (i < 0) return;
+  food[i].restock = !food[i].restock;
+  save(KEYS.food, food);
+  renderMobFood();
+}
+
+// ── Override nav on mobile ────────────────────────────────────
+// Patch nav() so clicking desktop nav on mobile goes through mobNav
+const _desktopNav = nav;
+window.nav = function(page) {
+  if (IS_MOBILE()) { mobNav(page); return; }
+  _desktopNav(page);
+};
+
+// ── On resize, re-init correct UI ────────────────────────────
+window.addEventListener('resize', () => {
+  if (IS_MOBILE()) {
+    document.getElementById('mob-tabs').style.display = 'flex';
+    mobNav(_mobCurrentPage);
+  } else {
+    document.getElementById('mob-tabs').style.display = 'none';
+  }
+});
+
+// ── Init: choose mobile or desktop on load ────────────────────
+function initUI() {
+  if (IS_MOBILE()) {
+    mobNav('dashboard');
+  } else {
+    renderDashboard();
+  }
+}
 </script>
 
 <!-- EVENT MODAL -->
