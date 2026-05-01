@@ -920,7 +920,8 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
     transition: color 0.15s;
     -webkit-tap-highlight-color: transparent;
   }
-  .mob-tab .tab-icon { font-size: 20px; line-height: 1; }
+  .mob-tab .tab-icon { font-size: 20px; line-height: 1; display:flex; align-items:center; justify-content:center; }
+  .mob-tab .tab-icon svg { width:22px; height:22px; stroke:currentColor; }
   .mob-tab.active { color: var(--cream); }
   .mob-tab.active .tab-icon { transform: translateY(-2px); }
 
@@ -1351,37 +1352,40 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
 <!-- MOBILE BOTTOM TAB BAR -->
 <div id="mob-tabs">
   <button class="mob-tab active" id="mobtab-dashboard" data-page="dashboard">
-    <span class="tab-icon">⌂</span>
+    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
     <span>Home</span>
   </button>
   <button class="mob-tab" id="mobtab-duesoon" data-page="duesoon">
-    <span class="tab-icon">⏰</span>
+    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
     <span>Due Soon</span>
   </button>
   <button class="mob-tab" id="mobtab-tasks" data-page="tasks">
-    <span class="tab-icon">✓</span>
+    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>
     <span>Tasks</span>
   </button>
   <button class="mob-tab" id="mobtab-food" data-page="food">
-    <span class="tab-icon">◉</span>
+    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span>
     <span>Food</span>
   </button>
   <button class="mob-tab" id="mobtab-more" data-page="more">
-    <span class="tab-icon">⋯</span>
+    <span class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></span>
     <span>More</span>
   </button>
 </div>
 
-<!-- MOBILE "MORE" PAGE -->
+<!-- MOBILE "MORE" PAGE — inside #main so it gets correct padding -->
+
+
+<div id="main">
+
+<!-- MOBILE MORE PAGE -->
 <div class="page" id="page-more">
-  <div style="padding:8px 0 16px">
-    <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--forest);margin-bottom:4px">Foley Property</div>
-    <div style="font-size:12px;color:var(--muted);font-style:italic">Ivan & Michaela · 6 acres</div>
+  <div class="page-header">
+    <h2>More</h2>
+    <p>Foley Property · Ivan & Michaela · 6 acres</p>
   </div>
   <div id="mob-more-list"></div>
 </div>
-
-<div id="main">
 
 <!-- DASHBOARD -->
 <div class="page active" id="page-dashboard">
@@ -2106,15 +2110,15 @@ function mobNav(page) {
 
 // ── More page ────────────────────────────────────────────────
 const MOB_MORE_PAGES = [
-  { page:'household',  label:'Household Work',  icon:'🏠' },
-  { page:'projects',   label:'Projects',         icon:'🔨' },
-  { page:'garden',     label:'Garden',           icon:'🌱' },
-  { page:'planning',   label:'Planning',         icon:'📋' },
-  { page:'notes',      label:'Property Notes',   icon:'📝' },
-  { page:'mowers',     label:'Mower Log',        icon:'⚙' },
-  { page:'planner',    label:'Planner',          icon:'📅' },
-  { page:'statistics', label:'Statistics',       icon:'📊' },
-  { page:'settings',   label:'Settings',         icon:'⚙️' },
+  { page:'household',  label:'Household Work',  icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>` },
+  { page:'projects',   label:'Projects',         icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="6" height="6"/><rect x="9" y="3" width="6" height="6"/><rect x="16" y="3" width="6" height="6"/><rect x="2" y="13" width="6" height="6"/><rect x="9" y="13" width="6" height="6"/><rect x="16" y="13" width="6" height="6"/></svg>` },
+  { page:'garden',     label:'Garden',           icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M5 3a7 7 0 0 0 7 7"/><path d="M19 3a7 7 0 0 1-7 7"/></svg>` },
+  { page:'planning',   label:'Planning',         icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>` },
+  { page:'notes',      label:'Property Notes',   icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>` },
+  { page:'mowers',     label:'Mower Log',        icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>` },
+  { page:'planner',    label:'Planner',          icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg>` },
+  { page:'statistics', label:'Statistics',       icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>` },
+  { page:'settings',   label:'Settings',         icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>` },
 ];
 
 function renderMobMore() {
@@ -5053,11 +5057,11 @@ function mobInit() {
 
 // ── Mobile tab bar customisation ─────────────────────────────
 const DEFAULT_MOB_TABS = [
-  { page:'dashboard', label:'Home',     icon:'⌂' },
-  { page:'duesoon',   label:'Due Soon', icon:'⏰' },
-  { page:'tasks',     label:'Tasks',    icon:'✓' },
-  { page:'food',      label:'Food',     icon:'◉' },
-  { page:'more',      label:'More',     icon:'⋯' },
+  { page:'dashboard', label:'Home',     icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>` },
+  { page:'duesoon',   label:'Due Soon', icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>` },
+  { page:'tasks',     label:'Tasks',    icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>` },
+  { page:'food',      label:'Food',     icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>` },
+  { page:'more',      label:'More',     icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>` },
 ];
 
 function loadMobTabs() {
@@ -5093,16 +5097,16 @@ function buildMobTabSettings() {
   if (!el) return;
   const tabs = loadMobTabs();
   const allPages = [
-    { page:'dashboard',  label:'Dashboard',     icon:'⌂' },
-    { page:'duesoon',    label:'Due Soon',       icon:'⏰' },
-    { page:'tasks',      label:'Master Tasks',   icon:'✓' },
-    { page:'food',       label:'Food',           icon:'◉' },
-    { page:'household',  label:'Household',      icon:'🏠' },
-    { page:'projects',   label:'Projects',       icon:'🔨' },
-    { page:'garden',     label:'Garden',         icon:'🌱' },
-    { page:'mowers',     label:'Mowers',         icon:'⚙' },
-    { page:'planner',    label:'Planner',        icon:'📅' },
-    { page:'more',       label:'More (menu)',    icon:'⋯' },
+    { page:'dashboard',  label:'Dashboard',     icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>` },
+    { page:'duesoon',    label:'Due Soon',       icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>` },
+    { page:'tasks',      label:'Master Tasks',   icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>` },
+    { page:'food',       label:'Food',           icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>` },
+    { page:'household',  label:'Household',      icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>` },
+    { page:'projects',   label:'Projects',       icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="6" height="6"/><rect x="9" y="3" width="6" height="6"/><rect x="16" y="3" width="6" height="6"/><rect x="2" y="13" width="6" height="6"/><rect x="9" y="13" width="6" height="6"/><rect x="16" y="13" width="6" height="6"/></svg>` },
+    { page:'garden',     label:'Garden',         icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M5 3a7 7 0 0 0 7 7"/><path d="M19 3a7 7 0 0 1-7 7"/></svg>` },
+    { page:'mowers',     label:'Mowers',         icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>` },
+    { page:'planner',    label:'Planner',        icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg>` },
+    { page:'more',       label:'More (menu)',    icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>` },
   ];
   el.innerHTML = `
     <p style="font-size:12px;color:var(--muted);margin-bottom:14px">
@@ -5153,7 +5157,7 @@ function mobTabDrop(e, i) {
 }
 function mobTabChangePage(i, page) {
   const tabs = loadMobTabs();
-  const allPages = [{page:'dashboard',label:'Dashboard',icon:'⌂'},{page:'duesoon',label:'Due Soon',icon:'⏰'},{page:'tasks',label:'Master Tasks',icon:'✓'},{page:'food',label:'Food',icon:'◉'},{page:'household',label:'Household',icon:'🏠'},{page:'projects',label:'Projects',icon:'🔨'},{page:'garden',label:'Garden',icon:'🌱'},{page:'mowers',label:'Mowers',icon:'⚙'},{page:'planner',label:'Planner',icon:'📅'},{page:'more',label:'More',icon:'⋯'}];
+  const allPages = [{page:'dashboard',label:'Dashboard',icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`},{page:'duesoon',label:'Due Soon',icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`},{page:'tasks',label:'Master Tasks',icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`},{page:'food',label:'Food',icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`},{page:'household',label:'Household',icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>`},{page:'projects',label:'Projects',icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="6" height="6"/><rect x="9" y="3" width="6" height="6"/><rect x="16" y="3" width="6" height="6"/><rect x="2" y="13" width="6" height="6"/><rect x="9" y="13" width="6" height="6"/><rect x="16" y="13" width="6" height="6"/></svg>`},{page:'garden',label:'Garden',icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M5 3a7 7 0 0 0 7 7"/><path d="M19 3a7 7 0 0 1-7 7"/></svg>`},{page:'mowers',label:'Mowers',icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>`},{page:'planner',label:'Planner',icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg>`},{page:'more',label:'More',icon:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>`}];
   const match = allPages.find(p => p.page === page);
   if (match) { tabs[i].page = match.page; tabs[i].icon = match.icon; tabs[i].label = match.label; }
   saveMobTabs(tabs);
