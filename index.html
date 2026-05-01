@@ -1619,17 +1619,6 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
     <h2>Food Inventory</h2>
     <p>Pantry, fridge, freezer, and emergency supplies</p>
   </div>
-  <div class="form-row" style="margin-bottom:16px">
-    <div class="form-group" style="max-width:160px">
-      <label>Filter by type</label>
-      <select id="food-filter" onchange="renderFood()">
-        <option value="">All</option><option>Cold</option><option>Frozen</option><option>Dry</option><option>Emergency Storage</option>
-      </select>
-    </div>
-    <div style="align-self:flex-end">
-      <button class="btn btn-primary" onclick="openFoodModal()">+ Add Item</button>
-    </div>
-  </div>
   <div id="food-content"></div>
 </div>
 
@@ -2652,6 +2641,7 @@ let _isOnline = navigator.onLine;
 let _offlineQueue = [];
 let _realtimeSubs = [];
 let _syncDebounce = null;
+let _suppressRealtime = false;  // true while we're writing our own changes
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
@@ -2672,6 +2662,7 @@ function save(key, data) {
 
 async function _pushToSupabase(table, data) {
   _setSyncing(true);
+  _suppressRealtime = true;
   try {
     const rows = data.map(item => _toSnake(item));
     if (rows.length > 0) {
@@ -2683,10 +2674,14 @@ async function _pushToSupabase(table, data) {
     console.error('Supabase push error:', e);
     _setSyncing(false, true);
     toast('Sync error — saved locally', 'warn', 3000);
+  } finally {
+    // Re-enable after a short delay to let realtime events settle
+    setTimeout(() => { _suppressRealtime = false; }, 1500);
   }
 }
 
 async function _pushTableToSupabase(table, items) {
+  _suppressRealtime = true;
   try {
     const rows = items.map(item => _toSnake(item));
     if (rows.length > 0) {
@@ -2694,6 +2689,7 @@ async function _pushTableToSupabase(table, items) {
       if (error) { console.error('Push error', table, error); }
     }
   } catch(e) { console.error('Push error:', table, e); }
+  finally { setTimeout(() => { _suppressRealtime = false; }, 1500); }
 }
 
 async function syncNow() {
@@ -2747,6 +2743,7 @@ function _subscribeRealtime() {
 }
 
 function _handleRemoteChange(key, payload) {
+  if (_suppressRealtime) return;  // ignore our own writes
   const local = load(key);
   if (payload.eventType === 'DELETE') {
     const filtered = local.filter(r => r.id !== payload.old.id);
@@ -2757,10 +2754,14 @@ function _handleRemoteChange(key, payload) {
     if (idx >= 0) local[idx] = incoming; else local.push(incoming);
     localStorage.setItem(key, JSON.stringify(local));
   }
-  // Refresh the current page
-  _refreshCurrentPage();
-  toast('↻ Updated from another device', 'info', 2000);
+  // Refresh the current page (debounced to batch multiple row updates)
+  clearTimeout(_realtimeRefreshTimer);
+  _realtimeRefreshTimer = setTimeout(() => {
+    _refreshCurrentPage();
+    toast('↻ Synced from another device', 'info', 2000);
+  }, 500);
 }
+let _realtimeRefreshTimer = null;
 
 function _refreshCurrentPage() {
   const active = document.querySelector('.page.active');
@@ -3800,54 +3801,74 @@ function deleteMower(id) {
 // ============================================================
 // FOOD INVENTORY
 // ============================================================
+let _foodFilter = '';
+
 function renderFood() {
   const food = load(KEYS.food);
-  const filterEl = document.getElementById('food-filter');
-  const filter = filterEl ? filterEl.value : '';
-  const filtered = filter ? food.filter(f=>f.type===filter) : food;
-
-  const sections = [
-    ['Cold / Refrigerated', 'Cold', 'food-cold'],
-    ['Frozen', 'Frozen', 'food-frozen'],
-    ['Dry / Pantry', 'Dry', 'food-dry'],
-    ['Emergency / Bulk Storage', 'Emergency Storage', 'food-emergency'],
-  ];
-
   const fcEl = document.getElementById('food-content');
   if (!fcEl) return;
-  fcEl.innerHTML = sections.map(([label, type, cls]) => {
-    const items = filtered.filter(f => f.type === type);
-    if (!items.length && filter && filter !== type) return '';
-    return `
-      <div class="food-section-header ${cls}">${label} (${items.length} items)</div>
-      <div class="card" style="margin-bottom:4px">
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th style="width:30px"></th><th>Item</th><th>Location</th><th>Qty</th><th>Use By</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody>
-              ${items.map(f => {
-                const st = foodStatus(f);
-                const stBadge = st==='Expired'?'badge-overdue':st==='Use Soon'?'badge-medium':st==='Low'?'badge-medium':st==='Used Up'?'badge-done':'';
-                return `<tr ${f.usedUp?'style="opacity:.45"':''}>
-                  <td><input type="checkbox" ${f.usedUp?'checked':''} style="accent-color:var(--forest)" title="Mark used up" onchange="toggleFood('${f.id}',this.checked)"></td>
-                  <td style="font-weight:${f.usedUp?'400':'500'}">${f.name}${f.restock?'<span class="badge badge-medium" style="margin-left:6px;font-size:9px">Restock</span>':''}${f.notes?`<div style="font-size:11px;color:var(--muted)">${f.notes}</div>`:''}
-                  </td>
-                  <td style="font-size:12px;color:var(--muted)">${f.location||'—'}</td>
-                  <td style="font-size:12px">${f.qty||''}${f.unit?' '+f.unit:''}</td>
-                  <td style="font-size:12px">${f.useby?fmtDate(f.useby):'—'}</td>
-                  <td><span class="badge ${stBadge}">${st}</span></td>
-                  <td style="white-space:nowrap">
-                    <button class="btn btn-secondary btn-sm" onclick="openFoodModal('${f.id}')">Edit</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteFood('${f.id}')">Del</button>
-                  </td>
-                </tr>`;
-              }).join('') || '<tr><td colspan="7" class="empty-state">No items in this category</td></tr>'}
-            </tbody>
-          </table>
-        </div>
+
+  const filtered = _foodFilter ? food.filter(f => f.type === _foodFilter) : food;
+  const statusClass = {'In Stock':'badge-done','Use Soon':'badge-medium','Expired':'badge-overdue','Low':'badge-medium','Used Up':''};
+  const typeFilters = ['','Cold','Frozen','Dry','Emergency Storage'];
+
+  const alerts = food.filter(f => !f.usedUp && ['Expired','Use Soon','Low'].includes(foodStatus(f)));
+
+  fcEl.innerHTML = `
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center">
+      ${typeFilters.map(t => `
+        <button class="btn ${_foodFilter===t?'btn-primary':'btn-secondary'} btn-sm"
+          onclick="_foodFilter='${t}';renderFood()">
+          ${t||'All'}
+        </button>`).join('')}
+      <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="openFoodModal()">+ Add Item</button>
+    </div>
+    ${alerts.length ? `
+      <div class="alert alert-warn" style="margin-bottom:16px;cursor:pointer" onclick="document.getElementById('food-alerts-detail').style.display=document.getElementById('food-alerts-detail').style.display==='none'?'block':'none'">
+        <span>⚠</span>
+        <strong>${alerts.length} item${alerts.length>1?'s':''} need attention</strong>
+        — ${alerts.map(f=>f.name).join(', ')}
       </div>
-    `;
-  }).join('');
+    ` : ''}
+    <div style="columns:2;column-gap:16px">
+      ${['Cold','Frozen','Dry','Emergency Storage'].map(type => {
+        const items = filtered.filter(f => f.type === type);
+        if (!items.length) return '';
+        const label = type==='Cold'?'Cold / Refrigerated':type==='Dry'?'Dry / Pantry':type==='Emergency Storage'?'Emergency / Bulk':type;
+        const cls = type==='Cold'?'food-cold':type==='Frozen'?'food-frozen':type==='Dry'?'food-dry':'food-emergency';
+        return `<div style="break-inside:avoid;margin-bottom:20px">
+          <div class="food-section-header ${cls}" style="margin-bottom:8px">${label} (${items.length})</div>
+          ${items.map(f => {
+            const st = foodStatus(f);
+            const stCls = statusClass[st] || '';
+            return `<div class="card" style="margin-bottom:8px;${f.usedUp?'opacity:0.5':''}">
+              <div class="card-body" style="padding:12px 14px">
+                <div style="display:flex;align-items:flex-start;gap:10px">
+                  <input type="checkbox" ${f.usedUp?'checked':''} style="accent-color:var(--forest);width:16px;height:16px;margin-top:2px;flex-shrink:0;cursor:pointer" title="Mark used up" onchange="toggleFood('${f.id}',this.checked)">
+                  <div style="flex:1;min-width:0">
+                    <div style="font-weight:600;font-size:13px;${f.usedUp?'text-decoration:line-through;color:var(--muted)':''}">${f.name}
+                      ${f.restock?'<span class="badge badge-medium" style="font-size:9px;margin-left:4px">Restock</span>':''}
+                    </div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:2px">
+                      ${f.location||''}${f.location&&f.qty?' · ':''}${f.qty?f.qty+' '+f.unit:''}${f.useby?' · Use by: '+fmtDate(f.useby):''}
+                    </div>
+                    ${f.notes?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${f.notes}</div>`:''}
+                  </div>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+                    <span class="badge ${stCls}" style="white-space:nowrap">${st}</span>
+                    <div style="display:flex;gap:4px">
+                      <button class="btn btn-secondary btn-sm" onclick="openFoodModal('${f.id}')">Edit</button>
+                      <button class="btn btn-danger btn-sm" onclick="deleteFood('${f.id}')">Del</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`;
+      }).join('')}
+    </div>
+  `;
 }
 
 function toggleFood(id, val) {
