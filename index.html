@@ -1159,6 +1159,145 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
   .mob-only { display: none !important; }
 }
 
+
+/* ═══════════════════════════════════════════════════
+   MOBILE MODAL OVERRIDES
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  .modal-overlay {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 20px 20px 0 0 !important;
+    padding: 0 !important;
+    max-height: 92vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    position: relative !important;
+  }
+
+  /* Drag handle pill at top */
+  .modal::before {
+    content: '';
+    display: block;
+    width: 36px; height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 12px auto 0;
+    flex-shrink: 0;
+  }
+
+  .modal h3 {
+    font-size: 18px !important;
+    margin: 14px 20px 16px !important;
+    padding: 0 !important;
+  }
+
+  /* Scrollable content area */
+  .modal-inner {
+    padding: 0 20px 12px !important;
+    overflow-y: auto !important;
+    flex: 1 !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* All form rows go single column */
+  .modal .form-row {
+    flex-direction: column !important;
+    gap: 12px !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* Exception: short rows that make sense side by side */
+  .modal .form-row.mob-row-2 {
+    flex-direction: row !important;
+  }
+
+  .modal .form-group {
+    min-width: 0 !important;
+    flex: none !important;
+    width: 100% !important;
+  }
+
+  /* Larger inputs */
+  .modal input[type=text],
+  .modal input[type=date],
+  .modal input[type=number],
+  .modal input[type=time],
+  .modal input[type=email],
+  .modal select,
+  .modal textarea {
+    font-size: 16px !important;
+    padding: 12px 14px !important;
+    border-radius: 10px !important;
+    min-height: 48px;
+  }
+
+  .modal label {
+    font-size: 12px !important;
+    letter-spacing: 0.04em;
+    margin-bottom: 5px !important;
+    display: block;
+  }
+
+  .modal textarea {
+    min-height: 90px !important;
+  }
+
+  /* Sticky action bar */
+  .modal .modal-actions {
+    position: sticky !important;
+    bottom: 0 !important;
+    background: var(--white) !important;
+    border-top: 1px solid var(--cream-dark) !important;
+    padding: 12px 20px env(safe-area-inset-bottom, 16px) !important;
+    margin: 0 !important;
+    display: flex !important;
+    gap: 10px !important;
+    flex-shrink: 0;
+  }
+
+  .modal .modal-actions .btn {
+    flex: 1 !important;
+    padding: 14px 10px !important;
+    font-size: 15px !important;
+    text-align: center !important;
+    border-radius: 10px !important;
+  }
+
+  .modal .modal-actions .btn-danger {
+    flex: 0 0 auto !important;
+    padding: 14px 16px !important;
+  }
+
+  /* Checkbox row stays horizontal */
+  .modal .form-row:has(input[type=checkbox]) {
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+
+  /* Time row in event modal stays 2-col */
+  #event-time-row {
+    flex-direction: row !important;
+  }
+  #event-time-row .form-group {
+    flex: 1 !important;
+    width: auto !important;
+  }
+
+  /* Keyboard shortcuts modal grid */
+  #modal-shortcuts .modal-inner > div[style*="grid"] {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1632,6 +1771,7 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
 <!-- MODALS -->
 <div class="modal-overlay" id="modal-task">
   <div class="modal">
+<div class="modal-inner">
     <h3 id="modal-task-title">Add Task</h3>
     <input type="hidden" id="task-edit-id">
     <div class="form-row">
@@ -1707,7 +1847,8 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
         <textarea id="task-notes"></textarea>
       </div>
     </div>
-    <div class="modal-actions">
+    </div>
+<div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('modal-task')">Cancel</button>
       <button class="btn btn-primary" onclick="saveTask()">Save Task</button>
     </div>
@@ -1716,6 +1857,7 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
 
 <div class="modal-overlay" id="modal-hh">
   <div class="modal">
+<div class="modal-inner">
     <h3 id="modal-hh-title">Add Household Task</h3>
     <input type="hidden" id="hh-edit-id">
     <div class="form-row">
@@ -1751,7 +1893,8 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
     <div class="form-row">
       <div class="form-group"><label>Notes</label><textarea id="hh-notes"></textarea></div>
     </div>
-    <div class="modal-actions">
+    </div>
+<div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('modal-hh')">Cancel</button>
       <button class="btn btn-primary" onclick="saveHH()">Save Task</button>
     </div>
@@ -1760,6 +1903,7 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
 
 <div class="modal-overlay" id="modal-proj">
   <div class="modal">
+<div class="modal-inner">
     <h3 id="modal-proj-title">Add Project</h3>
     <input type="hidden" id="proj-edit-id">
     <div class="form-row">
@@ -1808,7 +1952,8 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
     <div class="form-row">
       <div class="form-group"><label>Notes</label><textarea id="proj-notes"></textarea></div>
     </div>
-    <div class="modal-actions">
+    </div>
+<div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('modal-proj')">Cancel</button>
       <button class="btn btn-primary" onclick="saveProject()">Save Project</button>
     </div>
@@ -1817,6 +1962,7 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
 
 <div class="modal-overlay" id="modal-food">
   <div class="modal">
+<div class="modal-inner">
     <h3 id="modal-food-title">Add Food Item</h3>
     <input type="hidden" id="food-edit-id">
     <div class="form-row">
@@ -1851,7 +1997,8 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
     <div class="form-row">
       <div class="form-group"><label>Notes</label><textarea id="food-notes"></textarea></div>
     </div>
-    <div class="modal-actions">
+    </div>
+<div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('modal-food')">Cancel</button>
       <button class="btn btn-primary" onclick="saveFood()">Save Item</button>
     </div>
@@ -1860,6 +2007,7 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
 
 <div class="modal-overlay" id="modal-mower">
   <div class="modal">
+<div class="modal-inner">
     <h3>Add / Edit Mower</h3>
     <input type="hidden" id="mower-edit-id">
     <div class="form-row">
@@ -1888,7 +2036,8 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
     <div class="form-row">
       <div class="form-group"><label>Next Service Notes</label><textarea id="mower-notes"></textarea></div>
     </div>
-    <div class="modal-actions">
+    </div>
+<div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('modal-mower')">Cancel</button>
       <button class="btn btn-primary" onclick="saveMower()">Save Mower</button>
     </div>
@@ -4654,6 +4803,7 @@ window.addEventListener('appinstalled', () => {
 <!-- EVENT MODAL -->
 <div class="modal-overlay" id="modal-event">
   <div class="modal" style="max-width:520px">
+<div class="modal-inner">
     <h3 id="modal-event-title">Add Event</h3>
     <input type="hidden" id="event-edit-id">
     <div class="form-row">
@@ -4704,7 +4854,7 @@ window.addEventListener('appinstalled', () => {
         <input type="time" id="event-end-time">
       </div>
     </div>
-    <div class="form-row">
+    <div class="form-row" style="flex-direction:row!important">
       <div class="form-group" style="flex-direction:row; align-items:center; gap:8px; flex:none">
         <input type="checkbox" id="event-allday" style="width:16px;height:16px;accent-color:var(--forest)" onchange="toggleAllDay(this.checked)">
         <label style="text-transform:none; font-size:13px; cursor:pointer" for="event-allday">All-day event</label>
@@ -4732,7 +4882,8 @@ window.addEventListener('appinstalled', () => {
         <textarea id="event-notes" style="min-height:60px"></textarea>
       </div>
     </div>
-    <div class="modal-actions">
+    </div>
+<div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('modal-event')">Cancel</button>
       <button class="btn btn-danger btn-sm" id="event-delete-btn" onclick="deleteCurrentEvent()" style="display:none;margin-right:auto">Delete</button>
       <button class="btn btn-primary" onclick="saveEvent()">Save Event</button>
@@ -4760,6 +4911,7 @@ window.addEventListener('appinstalled', () => {
 <!-- ── Keyboard shortcuts modal ── -->
 <div class="modal-overlay" id="modal-shortcuts">
   <div class="modal" style="max-width:480px">
+<div class="modal-inner">
     <h3>Keyboard Shortcuts</h3>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;font-size:13px">
       <div><kbd>?</kbd> Show this help</div>
@@ -4773,7 +4925,8 @@ window.addEventListener('appinstalled', () => {
       <div><kbd>Ctrl+S</kbd> Save open form</div>
       <div><kbd>Alt+←</kbd> Previous month (Planner)</div>
     </div>
-    <div class="modal-actions">
+    </div>
+<div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('modal-shortcuts')">Close</button>
     </div>
   </div>
