@@ -40,6 +40,8 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html, body { overflow-x: hidden; max-width: 100vw; }
+
 body {
   font-family: 'Source Serif 4', Georgia, serif;
   background: var(--cream);
@@ -110,9 +112,10 @@ nav a .icon { font-size: 15px; width: 18px; text-align: center; }
 #main {
   margin-left: 220px;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
-.page { display: none; padding: 32px 36px; }
+.page { display: none; padding: 32px 36px; max-width: 100%; overflow-x: hidden; }
 .page.active { display: block; }
 
 .page-header {
