@@ -2255,23 +2255,23 @@ function renderMobDashboard() {
       <div class="mob-section">Upcoming & Overdue</div>
       ${upcomingTasks.map(t => {
         const due = mobDueLabel(t);
-        return \`<div class="mob-card">
+        return `<div class="mob-card">
           <div class="mob-card-body" onclick="this.nextElementSibling.classList.toggle('open')">
-            <div class="mob-card-title">\${t.name}</div>
+            <div class="mob-card-title">${t.name}</div>
             <div class="mob-card-meta">
-              \${mobPriorityPill(t.priority)}
-              \${mobWhoPill(t.who)}
-              <span class="mob-due \${due.cls}">\${due.text}</span>
+              ${mobPriorityPill(t.priority)}
+              ${mobWhoPill(t.who)}
+              <span class="mob-due ${due.cls}">${due.text}</span>
             </div>
           </div>
           <div class="mob-card-detail">
-            \${t.area ? \`<div class="mob-card-detail-row"><span class="mob-card-detail-label">Area</span><span>\${t.area}</span></div>\` : ''}
-            \${t.freq ? \`<div class="mob-card-detail-row"><span class="mob-card-detail-label">Frequency</span><span>\${t.freq}</span></div>\` : ''}
+            ${t.area ? `<div class="mob-card-detail-row"><span class="mob-card-detail-label">Area</span><span>${t.area}</span></div>` : ''}
+            ${t.freq ? `<div class="mob-card-detail-row"><span class="mob-card-detail-label">Frequency</span><span>${t.freq}</span></div>` : ''}
             <div style="margin-top:8px;margin-bottom:4px">
-              <button style="background:var(--forest);color:var(--cream);border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer" onclick="mobMarkTaskDone('\${t.id}')">✓ Mark Done</button>
+              <button style="background:var(--forest);color:var(--cream);border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer" onclick="mobMarkTaskDone('${t.id}')">✓ Mark Done</button>
             </div>
           </div>
-        </div>\`;
+        </div>`;
       }).join('')}
     ` : '<div style="padding:20px;text-align:center;color:var(--muted);font-style:italic;margin-bottom:8px">All caught up! 🎉</div>'}
 
@@ -2280,15 +2280,15 @@ function renderMobDashboard() {
       ${foodAlertItems.map(f => {
         const st = foodStatus(f);
         const cls = statusColor[st] || 'mob-food-instock';
-        return \`<div class="mob-card">
+        return `<div class="mob-card">
           <div class="mob-card-body" style="display:flex;align-items:center;gap:12px">
             <div style="flex:1">
-              <div class="mob-card-title" style="margin-bottom:4px">\${f.name}</div>
-              <div style="font-size:12px;color:var(--muted)">\${f.type} · \${f.location||'—'} · \${f.qty} \${f.unit}</div>
+              <div class="mob-card-title" style="margin-bottom:4px">${f.name}</div>
+              <div style="font-size:12px;color:var(--muted)">${f.type} · ${f.location||'—'} · ${f.qty} ${f.unit}</div>
             </div>
-            <span class="mob-food-status \${cls}">\${st}</span>
+            <span class="mob-food-status ${cls}">${st}</span>
           </div>
-        </div>\`;
+        </div>`;
       }).join('')}
     ` : ''}
 
@@ -2323,7 +2323,7 @@ function renderMobDashboard() {
     qa.id = 'mob-quick-add-bar';
     qa.className = 'mob-quick-add';
     qa.style.marginTop = '12px';
-    qa.innerHTML = \`<input type="text" id="mob-quick-task" placeholder="Quick-add a task…" onkeydown="if(event.key==='Enter')mobQuickAdd()"><button onclick="mobQuickAdd()">Add</button>\`;
+    qa.innerHTML = `<input type="text" id="mob-quick-task" placeholder="Quick-add a task…" onkeydown="if(event.key==='Enter')mobQuickAdd()"><button onclick="mobQuickAdd()">Add</button>`;
     statsEl2.after(qa);
     mobContent.before(qa);
   }
@@ -4877,7 +4877,7 @@ function renderMobGarden() {
     ['Early spring','Bed prep + cool crops','Compost, rake, seed peas, carrots, beets, lettuce.'],
     ['After frost','Warm-season transplanting','Tomatoes, peppers, squash, cucumbers, beans. Last frost ~May 8.'],
     ['Summer','Water + weed + succession','Mulch, weed, trellis, succession-sow as space opens.'],
-    ['Late summer','Harvest + preserve','Track preservation windows so produce doesn't pile up.'],
+    ['Late summer','Harvest + preserve','Track preservation windows so produce does not pile up.'],
     ['Fall','Cleanup + soil improvement','Remove spent plants, add compost, mulch garlic.'],
   ];
   const beds = [
