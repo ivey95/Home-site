@@ -1425,6 +1425,7 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
   </div>
   <div class="stat-grid" id="dash-stats"></div>
   <div style="display:flex;gap:10px;margin-bottom:20px;align-items:center;flex-wrap:wrap">
+    <button class="btn btn-secondary btn-sm" onclick="_pullFromSupabase().then(_refreshCurrentPage)" style="padding:6px 12px;font-size:11px" data-tip="Pull latest from Supabase">↻ Sync</button>
     <input type="text" id="quick-task" placeholder="Quick-add a task… (press Enter)" style="flex:1;max-width:420px" onkeydown="if(event.key==='Enter')quickAddTask()">
     <button class="btn btn-primary" onclick="quickAddTask()">+ Quick Task</button>
     <button class="btn btn-secondary" onclick="nav('planner');setTimeout(openEventModal,100)" data-tip="Add calendar event">+ Event</button>
@@ -2630,6 +2631,8 @@ const _COL = {
   repeatEnd:  'repeat_end',
   targetDate: 'target_date',
   timeEst:    'time_est',
+  start:      'start_date',
+  end:        'end_date',
 };
 
 function _toSnake(obj) {
@@ -2709,6 +2712,7 @@ async function _pullFromSupabase() {
   } catch(e) {
     console.error('Supabase pull error:', e);
     _setSyncing(false, true);
+    toast('Could not reach Supabase — using local data', 'warn', 3000);
     return false;
   }
 }
@@ -5431,6 +5435,8 @@ async function startApp() {
   // Try to pull from Supabase first (get latest data before rendering)
   await initSupabase();
   initUI();
+  // Re-render after Supabase data is loaded (in case seedData ran with stale local)
+  if (IS_MOBILE()) renderMobDashboard(); else renderDashboard();
   const _pwaPage = new URLSearchParams(location.search).get('page');
   if (_pwaPage && document.getElementById('page-' + _pwaPage)) {
     IS_MOBILE() ? mobNav(_pwaPage) : nav(_pwaPage);
