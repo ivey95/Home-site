@@ -1315,7 +1315,7 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
 
 <!-- SIDEBAR -->
 <div id="sidebar">
-  <div id="sidebar-header">
+  <div id="sidebar-header" onclick="nav('dashboard')" style="cursor:pointer" data-tip="Go to Dashboard">
     <h1>Foley Property</h1>
     <p>Ivan & Michaela · 6 acres</p>
   </div>
@@ -2069,6 +2069,7 @@ let _mobCurrentPage = 'dashboard';
 
 function mobNav(page) {
   _mobCurrentPage = page;
+  closeMobileSidebar();
 
   // Update tab bar
   document.querySelectorAll('.mob-tab').forEach(t => t.classList.remove('active'));
@@ -2119,6 +2120,7 @@ const MOB_MORE_PAGES = [
 function renderMobMore() {
   const el = document.getElementById('mob-more-list');
   if (!el) { console.warn('mob-more-list not found'); return; }
+  el.innerHTML = '';  // clear before rebuild to prevent stacking
   el.innerHTML = MOB_MORE_PAGES.map(p => `
     <div onclick="mobNavFull('${p.page}')" style="
       display:flex; align-items:center; gap:16px;
@@ -4406,6 +4408,12 @@ function resetSidebarToggleBtn() {
   if (btn) btn.textContent = '☰';
 }
 
+function closeMobileSidebar() {
+  document.getElementById('sidebar')?.classList.remove('open');
+  document.getElementById('sidebar-overlay')?.classList.remove('open');
+  resetSidebarToggleBtn();
+}
+
 function toggleMobileSidebar() {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebar-overlay');
@@ -4413,7 +4421,6 @@ function toggleMobileSidebar() {
   const isOpen = sidebar.classList.toggle('open');
   overlay.classList.toggle('open', isOpen);
   if (btn) btn.textContent = isOpen ? '✕' : '☰';
-  if (!isOpen) resetSidebarToggleBtn();
 }
 
 // ── Sidebar collapse ─────────────────────────────────────────
@@ -5256,7 +5263,7 @@ window.addEventListener('appinstalled', () => {
     // Swipe left more than 60px and mostly horizontal
     if (dx < -60 && dy < 60) {
       const sidebar = document.getElementById('sidebar');
-      if (sidebar?.classList.contains('open')) { sidebar.classList.remove('open'); document.getElementById('sidebar-overlay')?.classList.remove('open'); resetSidebarToggleBtn(); }
+      if (sidebar?.classList.contains('open')) closeMobileSidebar();
     }
     // Swipe right from left edge to open
     if (dx > 60 && dy < 60 && touchStartX < 30) {
@@ -5368,10 +5375,10 @@ window.addEventListener('appinstalled', () => {
 
 <!-- ── Mobile sidebar toggle ── -->
 <div id="sidebar-toggle">
-  <span class="toggle-title">Foley Property</span>
+  <span class="toggle-title" onclick="mobNav('dashboard')" style="cursor:pointer">Foley Property</span>
   <button class="toggle-btn" onclick="toggleMobileSidebar()" aria-label="Menu">☰</button>
 </div>
-<div id="sidebar-overlay" onclick="document.getElementById('sidebar').classList.remove('open');this.classList.remove('open');resetSidebarToggleBtn()"></div>
+<div id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
 
 <!-- ── Sidebar collapse button ── -->
 <button id="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" data-tip="Collapse sidebar">‹</button>
