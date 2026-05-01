@@ -2642,6 +2642,7 @@ let _offlineQueue = [];
 let _realtimeSubs = [];
 let _syncDebounce = null;
 const _localWriteIds = new Set();  // IDs we just wrote — ignore their realtime events
+let _initializing = true;  // suppress realtime during startup
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
@@ -2744,7 +2745,8 @@ function _subscribeRealtime() {
 }
 
 function _handleRemoteChange(key, payload) {
-  // Ignore events for records we just wrote ourselves
+  // Ignore events during startup or for records we just wrote
+  if (_initializing) return;
   const changedId = payload.new?.id || payload.old?.id;
   if (changedId && _localWriteIds.has(changedId)) return;
   const local = load(key);
@@ -2827,6 +2829,8 @@ async function initSupabase() {
 
   // Subscribe to real-time changes
   _subscribeRealtime();
+  // Allow a moment for any catch-up events to settle before processing realtime
+  setTimeout(() => { _initializing = false; }, 2000);
 
   if (!navigator.onLine) {
     document.getElementById('offline-banner')?.classList.add('show');
@@ -3024,7 +3028,7 @@ function renderDashboard() {
     return d !== null && d >= 0 && d <= 7 && t.status !== 'Done';
   }).length;
   const done = tasks.filter(t => t.status === 'Done').length;
-  const foodAlerts = food.filter(f => !f.usedUp && ['Expired','Use Soon','Low'].includes(foodStatus(f))).length;
+  const foodAlerts = food.filter(f => f.usedUp || ['Expired','Use Soon','Low'].includes(foodStatus(f))).length;
   // restockCount now included in foodAlerts above
 
   document.getElementById('dash-stats').innerHTML = `
@@ -3061,13 +3065,13 @@ function renderDashboard() {
   }).join('') || emptyState('No upcoming tasks', 'All caught up — great work!');
 
   // food alerts
-  const alerts = food.filter(f => !f.usedUp && ['Expired','Use Soon','Low'].includes(foodStatus(f)));
+  const alerts = food.filter(f => f.usedUp || ['Expired','Use Soon','Low'].includes(foodStatus(f)));
   document.getElementById('dash-food-alerts').innerHTML = alerts.length ? alerts.map(f => {
     const st = foodStatus(f);
     const cls = st === 'Expired' ? 'alert-danger' : f.restock ? 'alert-warn' : 'alert-warn';
     return `<div class="alert ${cls}" onclick="nav('food')" style="cursor:pointer">
-      <span>${st === 'Expired' ? '⚠' : f.restock ? '↻' : '⚡'}</span>
-      <div><strong>${f.name}</strong> — ${st === 'Expired' ? 'Expired' : f.restock ? 'Needs restock' : 'Use soon'}</div>
+      <span>${st === 'Expired' ? '⚠' : st === 'Used Up' ? '✗' : f.restock ? '↻' : '⚡'}</span>
+      <div><strong>${f.name}</strong> — ${st === 'Expired' ? 'Expired' : st === 'Used Up' ? 'Used up — restock?' : f.restock ? 'Needs restock' : 'Use soon'}</div>
     </div>`;
   }).join('') : '<div class="alert alert-info"><span>✓</span> No food alerts</div>';
 
@@ -3812,7 +3816,7 @@ function renderFood() {
 
   const filtered = _foodFilter ? food.filter(f => f.type === _foodFilter) : food;
   const typeFilters = ['','Cold','Frozen','Dry','Emergency Storage'];
-  const alerts = food.filter(f => !f.usedUp && ['Expired','Use Soon','Low'].includes(foodStatus(f)));
+  const alerts = food.filter(f => f.usedUp || ['Expired','Use Soon','Low'].includes(foodStatus(f)));
 
   const statusColor = {
     'In Stock':  { bg:'#e8f5e8', color:'var(--forest-light)' },
@@ -5145,7 +5149,7 @@ function renderMobStatistics() {
   const inProg  = tasks.filter(t => t.status==='In Progress').length;
   const openP   = proj.filter(p => p.status!=='Done'&&p.status!=='Skipped').length;
   const projCost= proj.filter(p=>p.status!=='Done'&&p.status!=='Skipped').reduce((s,p)=>s+(p.cost||0),0);
-  const foodAlerts = food.filter(f=>['Expired','Use Soon'].includes(foodStatus(f))&&!f.usedUp).length;
+  const foodAlerts = food.filter(f=>f.usedUp||['Expired','Use Soon','Low'].includes(foodStatus(f))).length;
 
   const content = `
     <div class="mob-section">Tasks</div>
