@@ -2241,8 +2241,9 @@ function renderMobDashboard() {
   const tableWrap = document.querySelector('#page-dashboard .tbl-wrap');
   if (tableWrap) tableWrap.style.display = 'none';
 
-  // Hide desktop food/project sections
-  document.querySelectorAll('#page-dashboard .section-label, #page-dashboard #dash-food, #page-dashboard #dash-projects').forEach(el => el.style.display = 'none');
+  // On mobile, hide the desktop two-col layout (tbl-wrap already hidden above)
+  const dashTwoCol = document.querySelector('#page-dashboard .two-col');
+  if (dashTwoCol) dashTwoCol.style.display = 'none';
 
   // Build mobile content
   const foodAlertItems = food.filter(f => ['Expired','Use Soon','Low'].includes(foodStatus(f)) && !f.usedUp);
@@ -2742,6 +2743,16 @@ function renderDashboard() {
   const hh = load(KEYS.household);
   const proj = load(KEYS.projects);
   const food = load(KEYS.food);
+
+  // Restore any elements hidden by mobile render
+  const dashTwoCol = document.querySelector('#page-dashboard .two-col');
+  if (dashTwoCol) dashTwoCol.style.display = '';
+  document.querySelectorAll('#page-dashboard .section-label').forEach(el => el.style.display = '');
+  const tableWrap = document.querySelector('#page-dashboard .tbl-wrap');
+  if (tableWrap) tableWrap.style.display = '';
+  // Remove any mobile-injected content
+  document.getElementById('mob-dash-content')?.remove();
+  document.getElementById('mob-quick-add-bar')?.remove();
 
   // date
   const now = new Date();
