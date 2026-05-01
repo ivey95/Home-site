@@ -1401,7 +1401,7 @@ th.sorted-desc::after { content: ' ↓'; opacity: 0.7; }
       <div class="card"><div class="tbl-wrap"><table id="dash-tasks-table"><thead><tr><th>Task</th><th>Due</th><th>Priority</th><th>Who</th></tr></thead><tbody></tbody></table></div></div>
     </div>
     <div>
-      <div class="section-label">Food Alerts</div>
+      <div class="section-label" style="display:flex;justify-content:space-between;align-items:center">Food Alerts <a onclick="nav('food')" style="font-size:11px;color:var(--forest-light);cursor:pointer;font-family:'Source Serif 4',serif;font-weight:400">View all →</a></div>
       <div id="dash-food-alerts"></div>
       <div class="section-label" style="margin-top:20px">High Priority Projects</div>
       <div id="dash-projects"></div>
@@ -2201,33 +2201,30 @@ function renderMobDashboard() {
   const statsEl = document.getElementById('dash-stats');
   if (statsEl) statsEl.innerHTML = `
     <div class="mob-stat-row">
-      <div class="mob-stat">
+      <div class="mob-stat" onclick="mobNav('duesoon')" style="cursor:pointer">
         <div class="mob-stat-val ${overdue.length > 0 ? 'red' : 'green'}">${overdue.length}</div>
         <div class="mob-stat-lbl">Overdue</div>
       </div>
-      <div class="mob-stat">
+      <div class="mob-stat" onclick="mobNav('duesoon')" style="cursor:pointer">
         <div class="mob-stat-val ${due7.length > 0 ? 'amber' : 'green'}">${due7.length}</div>
         <div class="mob-stat-lbl">Due This Week</div>
       </div>
-      <div class="mob-stat">
+      <div class="mob-stat" onclick="mobNav('tasks')" style="cursor:pointer">
         <div class="mob-stat-val green">${done}</div>
         <div class="mob-stat-lbl">Done</div>
       </div>
-      <div class="mob-stat">
+      <div class="mob-stat" onclick="mobNav('food')" style="cursor:pointer">
         <div class="mob-stat-val ${foodAlerts > 0 ? 'red' : ''}">${foodAlerts}</div>
         <div class="mob-stat-lbl">Food Alerts</div>
       </div>
     </div>
+    <div class="mob-quick-add" style="margin-top:4px">
+      <input type="text" id="mob-quick-task" placeholder="Quick-add a task…" onkeydown="if(event.key==='Enter')mobQuickAdd()">
+      <button onclick="mobQuickAdd()">+ Add</button>
+    </div>
   `;
 
-  // Quick add
-  const qEl = document.querySelector('#page-dashboard .mob-quick-add');
-  if (!qEl) {
-    const qa = document.createElement('div');
-    qa.className = 'mob-quick-add mob-only';
-    qa.innerHTML = `<input type="text" id="mob-quick-task" placeholder="Quick-add a task…" onkeydown="if(event.key==='Enter')mobQuickAdd()"><button onclick="mobQuickAdd()">Add</button>`;
-    statsEl?.after(qa);
-  }
+  // Quick add bar handled by mob-quick-add-bar below
 
   // Build full dashboard content below stats
   // Remove old desktop content and replace with mobile cards
@@ -2280,7 +2277,7 @@ function renderMobDashboard() {
       ${foodAlertItems.map(f => {
         const st = foodStatus(f);
         const cls = statusColor[st] || 'mob-food-instock';
-        return `<div class="mob-card">
+        return `<div class="mob-card" onclick="mobNav('food')" style="cursor:pointer">
           <div class="mob-card-body" style="display:flex;align-items:center;gap:12px">
             <div style="flex:1">
               <div class="mob-card-title" style="margin-bottom:4px">${f.name}</div>
@@ -2295,7 +2292,7 @@ function renderMobDashboard() {
     ${highProjects.length ? `
       <div class="mob-section">High Priority Projects</div>
       ${highProjects.map(p => `
-        <div class="mob-card">
+        <div class="mob-card" onclick="mobNav('projects')" style="cursor:pointer">
           <div class="mob-card-body">
             <div style="display:flex;align-items:flex-start;gap:8px">
               <div class="mob-card-title" style="flex:1">${p.name}</div>
@@ -2316,17 +2313,7 @@ function renderMobDashboard() {
   const statsEl2 = document.getElementById('dash-stats');
   if (statsEl2) statsEl2.after(mobContent);
 
-  // Quick add bar
-  const existingQA = document.getElementById('mob-quick-add-bar');
-  if (!existingQA && statsEl2) {
-    const qa = document.createElement('div');
-    qa.id = 'mob-quick-add-bar';
-    qa.className = 'mob-quick-add';
-    qa.style.marginTop = '12px';
-    qa.innerHTML = `<input type="text" id="mob-quick-task" placeholder="Quick-add a task…" onkeydown="if(event.key==='Enter')mobQuickAdd()"><button onclick="mobQuickAdd()">Add</button>`;
-    statsEl2.after(qa);
-    mobContent.before(qa);
-  }
+
 }
 
 function mobQuickAdd() {
@@ -2368,7 +2355,7 @@ function renderMobDueSoon() {
     ${filtered.length ? filtered.map(t => {
       const due = mobDueLabel(t);
       return `<div class="mob-card">
-        <div class="mob-card-body" onclick="this.nextElementSibling.classList.toggle('open')">
+        <div class="mob-card-body" onclick="this.nextElementSibling.classList.toggle('open')" style="cursor:pointer">
           <div class="mob-card-title">${t.name}</div>
           <div class="mob-card-meta">
             ${mobPriorityPill(t.priority)}
@@ -2437,7 +2424,7 @@ function renderMobTasks() {
       const due = mobDueLabel(t);
       const isDone = t.status === 'Done';
       return `<div class="mob-card">
-        <div class="mob-card-body" onclick="this.nextElementSibling.classList.toggle('open')">
+        <div class="mob-card-body" onclick="this.nextElementSibling.classList.toggle('open')" style="cursor:pointer">
           <div class="mob-card-title" style="${isDone?'text-decoration:line-through;opacity:0.5':''}">
             ${t.name}
           </div>
@@ -2767,16 +2754,16 @@ function renderDashboard() {
     return d !== null && d >= 0 && d <= 7 && t.status !== 'Done';
   }).length;
   const done = tasks.filter(t => t.status === 'Done').length;
-  const foodAlerts = food.filter(f => ['Expired','Use Soon'].includes(foodStatus(f))).length;
-  const restockCount = food.filter(f => f.restock && !f.usedUp).length;
+  const foodAlerts = food.filter(f => !f.usedUp && ['Expired','Use Soon','Low'].includes(foodStatus(f))).length;
+  // restockCount now included in foodAlerts above
 
   document.getElementById('dash-stats').innerHTML = `
-    <div class="stat-tile">${tile(tasks.length,'Total Tasks')}</div>
-    <div class="stat-tile ${overdue>0?'danger':''}">${tile(overdue,'Overdue')}</div>
-    <div class="stat-tile ${due7>0?'warn':''}">${tile(due7,'Due in 7 Days')}</div>
-    <div class="stat-tile good">${tile(done,'Done')}</div>
-    <div class="stat-tile info">${tile(proj.filter(p=>p.status!=='Done'&&p.status!=='Skipped').length,'Open Projects')}</div>
-    <div class="stat-tile ${foodAlerts>0?'danger':''}">${tile(foodAlerts+restockCount,'Food Alerts')}</div>
+    <div class="stat-tile" onclick="nav('tasks')" style="cursor:pointer" data-tip="Go to Tasks">${tile(tasks.length,'Total Tasks')}</div>
+    <div class="stat-tile ${overdue>0?'danger':''}" onclick="nav('duesoon')" style="cursor:pointer" data-tip="Go to Due Soon">${tile(overdue,'Overdue')}</div>
+    <div class="stat-tile ${due7>0?'warn':''}" onclick="nav('duesoon')" style="cursor:pointer" data-tip="Go to Due Soon">${tile(due7,'Due in 7 Days')}</div>
+    <div class="stat-tile good" onclick="nav('tasks')" style="cursor:pointer" data-tip="Go to Tasks">${tile(done,'Done')}</div>
+    <div class="stat-tile info" onclick="nav('projects')" style="cursor:pointer" data-tip="Go to Projects">${tile(proj.filter(p=>p.status!=='Done'&&p.status!=='Skipped').length,'Open Projects')}</div>
+    <div class="stat-tile ${foodAlerts>0?'danger':''}" onclick="nav('food')" style="cursor:pointer" data-tip="Go to Food Inventory">${tile(foodAlerts,'Food Alerts')}</div>
   `;
 
   // upcoming tasks
@@ -2795,7 +2782,7 @@ function renderDashboard() {
     const nd = t.nextDue;
     const diff = nd ? daysDiff(nd) : null;
     const dueLbl = !nd ? '<span class="tag">No date</span>' : diff < 0 ? `<span class="badge badge-overdue">Overdue ${Math.abs(diff)}d</span>` : diff === 0 ? '<span class="badge badge-high">Today</span>' : `<span style="font-size:12px">${fmtDate(nd)}</span>`;
-    return `<tr>
+    return `<tr onclick="nav('duesoon')" style="cursor:pointer">
       <td style="max-width:240px">${t.name}</td>
       <td>${dueLbl}</td>
       <td><span class="badge badge-${t.priority.toLowerCase()}">${t.priority}</span></td>
@@ -2804,11 +2791,11 @@ function renderDashboard() {
   }).join('') || emptyState('No upcoming tasks', 'All caught up — great work!');
 
   // food alerts
-  const alerts = food.filter(f => !f.usedUp && (foodStatus(f) === 'Expired' || foodStatus(f) === 'Use Soon' || f.restock));
+  const alerts = food.filter(f => !f.usedUp && ['Expired','Use Soon','Low'].includes(foodStatus(f)));
   document.getElementById('dash-food-alerts').innerHTML = alerts.length ? alerts.map(f => {
     const st = foodStatus(f);
     const cls = st === 'Expired' ? 'alert-danger' : f.restock ? 'alert-warn' : 'alert-warn';
-    return `<div class="alert ${cls}">
+    return `<div class="alert ${cls}" onclick="nav('food')" style="cursor:pointer">
       <span>${st === 'Expired' ? '⚠' : f.restock ? '↻' : '⚡'}</span>
       <div><strong>${f.name}</strong> — ${st === 'Expired' ? 'Expired' : f.restock ? 'Needs restock' : 'Use soon'}</div>
     </div>`;
@@ -2817,7 +2804,7 @@ function renderDashboard() {
   // high priority projects
   const highProj = proj.filter(p => p.priority === 'High' && p.status !== 'Done' && p.status !== 'Skipped').slice(0,4);
   document.getElementById('dash-projects').innerHTML = highProj.map(p => `
-    <div style="padding:10px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;background:var(--white)">
+    <div onclick="nav('projects')" style="padding:10px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;background:var(--white);cursor:pointer;transition:box-shadow .15s" onmouseover="this.style.boxShadow='var(--shadow)'" onmouseout="this.style.boxShadow=''">
       <div style="font-weight:600;font-size:13px">${p.name}</div>
       <div style="font-size:11px;color:var(--muted);margin-top:3px">${p.season} · ${p.who} · ${p.cost ? '$'+p.cost.toLocaleString() : 'No cost est.'}</div>
     </div>
