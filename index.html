@@ -3575,7 +3575,7 @@ function showInstallBanner() {
   banner.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--forest);color:var(--cream);padding:14px 20px;border-radius:10px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:14px;z-index:9000;font-size:13px;max-width:90vw;white-space:nowrap';
   banner.innerHTML = "<span>📱 Add Foley Property to your home screen</span>"
     + "<button onclick='installPWA()' style='background:var(--cream);color:var(--forest);border:none;padding:6px 14px;border-radius:6px;font-weight:600;cursor:pointer;font-size:12px;font-family:inherit'>Install</button>"
-    + "<button onclick='document.getElementById("install-banner").remove()' style='background:none;border:none;color:var(--sage-light);cursor:pointer;font-size:18px;line-height:1'>✕</button>";
+    + "<button onclick='this.parentElement.remove()' style='background:none;border:none;color:var(--sage-light);cursor:pointer;font-size:18px;line-height:1'>✕</button>";
   document.body.appendChild(banner);
 }
 
